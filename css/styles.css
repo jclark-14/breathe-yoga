@@ -1,0 +1,13 @@
+body {
+  color: #403768;
+}
+
+header {
+  background-color: #403768;
+  color: #e0cdc2;
+}
+
+select:focus,
+select:active {
+  outline-color: #403768;
+}
