@@ -12,4 +12,5 @@ interface Video {
   description: string;
   thumbnail: string;
   channel: string;
+  channelId: string;
 }

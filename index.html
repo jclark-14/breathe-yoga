@@ -27,7 +27,7 @@
         </div>
         <div class="text-lg font-light relative top-1 md:top-0">
           <a id="search" href="#">Search</a>
-          <a id="favorites" href="#" class="md:ml-9 ml-1">Favorites</a>
+          <a id="favorites" href="#" class="md:ml-9 ml-2">Favorites</a>
         </div>
       </div>
     </header>
@@ -105,7 +105,29 @@
             alt="yoga pose" />
         </div>
       </div>
-      <div id="results-container"></div>
+      <div id="results-container">
+        <div
+          class="md:hidden results-div container md:pt-14 pt-8 mx-auto md:flex flex-wrap max-w-screen-lg">
+          <h2 class="text-3xl font-medium md:pr-10 mb-9 w-full">Results</h2>
+          <div class="px-4 pt-4 md:pl-0 md:pt-0 flex flex-wrap">
+            <div class="video-div basis-1/3">
+              <a href="#" class="video"
+                ><img
+                  class="h-fit rounded-sm w-80 mb-2 thumbnail"
+                  src="https://i.ytimg.com/vi/XCIviBT3Txc/hqdefault.jpg"
+              /></a>
+              <div class="video-text w-80 pl-1">
+                <a href="#"
+                  ><p class="font-medium text-lg channel">Channel</p></a
+                >
+                <span class="font-normal text-md pr-4 w-80 max-w-80">
+                  Description
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
     <dialog class="modal rounded-md p-0 relative bottom-10">
       <div>
@@ -115,11 +137,21 @@
             class="absolute iconX fa-solid fa-x fa-lg right-2 top-4"></i>
         </a>
         <iframe
+          class="hidden md:flex lg-screen"
           loading="lazy"
           title="yoga video"
           width="1047"
           height="591"
-          allowfullscreen="allowfullscreen"
+          allowfullscreen="true"
+          src="https://www.youtube.com/embed/v7SN-d4qXx0">
+        </iframe>
+        <iframe
+          class="md:hidden mobile"
+          loading="lazy"
+          title="yoga video"
+          width="400"
+          height="225"
+          allowfullscreen="true"
           src="https://www.youtube.com/embed/v7SN-d4qXx0">
         </iframe>
       </div>
