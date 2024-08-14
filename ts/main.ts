@@ -3,7 +3,8 @@ const $submitSearch = document.querySelector('#submit');
 const $landing = document.querySelector('#landing');
 const $formInputs = document.querySelectorAll('select');
 const $main = document.querySelector('main');
-const $iFrame = document.querySelector('iframe');
+const $iFrameLg = document.querySelector('.lg-screen');
+const $iFrameMobile = document.querySelector('.mobile');
 const $img = document.querySelectorAll('img');
 const $dialog = document.querySelector('dialog');
 const $body = document.querySelector('body');
@@ -14,7 +15,8 @@ const $results = document.querySelector('#results-container');
 
 if (
   !$submitSearch ||
-  !$iFrame ||
+  !$iFrameLg ||
+  !$iFrameMobile ||
   !$img ||
   !$dialog ||
   !$landing ||
@@ -57,12 +59,13 @@ function createUrl(): void {
 
 async function searchYouTube(): Promise<void> {
   try {
-    createUrl();
     const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
+    console.log('fetch');
     const videos = await response.json();
+    videoArr = [];
     videos.items.forEach((item: any) => {
       const id = item.id.videoId;
       const title = item.snippet.title;
@@ -80,7 +83,6 @@ async function searchYouTube(): Promise<void> {
     });
     renderVideos();
     previousUrl = url;
-    videoArr = [];
   } catch (error) {
     console.error('Error:', error);
   }
@@ -169,19 +171,21 @@ $body.addEventListener('click', (event: Event): void => {
     const $resultsDiv = document.querySelector('.results-div');
     if (url !== previousUrl && $resultsDiv !== null) {
       $resultsDiv.remove();
+      createUrl();
       searchYouTube();
       toggleView($results);
     } else {
+      createUrl();
       searchYouTube();
       toggleView($results);
     }
-
     $form?.reset();
   }
 
   if (eventTarget === $xIcon) {
     $dialog.close();
-    $iFrame.setAttribute('src', '');
+    $iFrameLg.setAttribute('src', '');
+    $iFrameMobile.setAttribute('src', '');
   }
 
   if (videoArr[0]) {
@@ -190,10 +194,12 @@ $body.addEventListener('click', (event: Event): void => {
         $dialog.showModal();
         const videoId = eventTarget.dataset.id;
         const formattedStr = `https://www.youtube.com/embed/${videoId}`;
-        $iFrame.setAttribute('src', formattedStr);
+        $iFrameLg.setAttribute('src', formattedStr);
+        $iFrameMobile.setAttribute('src', formattedStr);
       }
     }
   }
+
   if (eventTarget === $search) {
     toggleView($landing);
   }
@@ -203,7 +209,8 @@ $dialog.addEventListener('dblclick', (event: Event): void => {
   const eventTarget = event.target as HTMLElement;
   if (eventTarget === $dialog) {
     $dialog.close();
-    $iFrame.setAttribute('src', '');
+    $iFrameLg.setAttribute('src', '');
+    $iFrameMobile.setAttribute('src', '');
   }
 });
 

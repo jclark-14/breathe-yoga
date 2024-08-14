@@ -4,7 +4,8 @@ const $submitSearch = document.querySelector('#submit');
 const $landing = document.querySelector('#landing');
 const $formInputs = document.querySelectorAll('select');
 const $main = document.querySelector('main');
-const $iFrame = document.querySelector('iframe');
+const $iFrameLg = document.querySelector('.lg-screen');
+const $iFrameMobile = document.querySelector('.mobile');
 const $img = document.querySelectorAll('img');
 const $dialog = document.querySelector('dialog');
 const $body = document.querySelector('body');
@@ -13,7 +14,8 @@ const $search = document.querySelector('#search');
 const $xIcon = document.querySelector('.iconX');
 const $results = document.querySelector('#results-container');
 if (!$submitSearch ||
-    !$iFrame ||
+    !$iFrameLg ||
+    !$iFrameMobile ||
     !$img ||
     !$dialog ||
     !$landing ||
@@ -56,12 +58,13 @@ function createUrl() {
 }
 async function searchYouTube() {
     try {
-        createUrl();
         const response = await fetch(url);
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);
         }
+        console.log('fetch');
         const videos = await response.json();
+        videoArr = [];
         videos.items.forEach((item) => {
             const id = item.id.videoId;
             const title = item.snippet.title;
@@ -79,7 +82,6 @@ async function searchYouTube() {
         });
         renderVideos();
         previousUrl = url;
-        videoArr = [];
     }
     catch (error) {
         console.error('Error:', error);
@@ -151,10 +153,12 @@ $body.addEventListener('click', (event) => {
         const $resultsDiv = document.querySelector('.results-div');
         if (url !== previousUrl && $resultsDiv !== null) {
             $resultsDiv.remove();
+            createUrl();
             searchYouTube();
             toggleView($results);
         }
         else {
+            createUrl();
             searchYouTube();
             toggleView($results);
         }
@@ -162,7 +166,8 @@ $body.addEventListener('click', (event) => {
     }
     if (eventTarget === $xIcon) {
         $dialog.close();
-        $iFrame.setAttribute('src', '');
+        $iFrameLg.setAttribute('src', '');
+        $iFrameMobile.setAttribute('src', '');
     }
     if (videoArr[0]) {
         for (let i = 0; i < $thumbnail.length; i++) {
@@ -170,7 +175,8 @@ $body.addEventListener('click', (event) => {
                 $dialog.showModal();
                 const videoId = eventTarget.dataset.id;
                 const formattedStr = `https://www.youtube.com/embed/${videoId}`;
-                $iFrame.setAttribute('src', formattedStr);
+                $iFrameLg.setAttribute('src', formattedStr);
+                $iFrameMobile.setAttribute('src', formattedStr);
             }
         }
     }
@@ -182,7 +188,8 @@ $dialog.addEventListener('dblclick', (event) => {
     const eventTarget = event.target;
     if (eventTarget === $dialog) {
         $dialog.close();
-        $iFrame.setAttribute('src', '');
+        $iFrameLg.setAttribute('src', '');
+        $iFrameMobile.setAttribute('src', '');
     }
 });
 function toggleView(element) {

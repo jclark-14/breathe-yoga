@@ -27,7 +27,7 @@
         </div>
         <div class="text-lg font-light relative top-1 md:top-0">
           <a id="search" href="#">Search</a>
-          <a id="favorites" href="#" class="md:ml-9 ml-1">Favorites</a>
+          <a id="favorites" href="#" class="md:ml-9 ml-2">Favorites</a>
         </div>
       </div>
     </header>
@@ -115,11 +115,21 @@
             class="absolute iconX fa-solid fa-x fa-lg right-2 top-4"></i>
         </a>
         <iframe
+          class="hidden md:flex lg-screen"
           loading="lazy"
           title="yoga video"
           width="1047"
           height="591"
-          allowfullscreen="allowfullscreen"
+          allowfullscreen="true"
+          src="https://www.youtube.com/embed/v7SN-d4qXx0">
+        </iframe>
+        <iframe
+          class="md:hidden flex mobile"
+          loading="lazy"
+          title="yoga video"
+          width="400"
+          height="225"
+          allowfullscreen="true"
           src="https://www.youtube.com/embed/v7SN-d4qXx0">
         </iframe>
       </div>
