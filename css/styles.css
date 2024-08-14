@@ -1,0 +1,57 @@
+body {
+  color: #403768;
+}
+
+header {
+  background-color: #403768;
+  color: #e0cdc2;
+  box-shadow: 0 4px 6px rgb(95, 95, 95);
+}
+
+h1 {
+  text-shadow: 4px 4px 6px rgb(30, 30, 30);
+}
+
+h2 {
+  text-shadow: 2px 2px 4px rgba(127, 127, 127, 0.377);
+}
+
+h3 {
+  text-shadow: 1px 1px 2px rgba(127, 127, 127, 0.377);
+}
+
+#search,
+#favorites {
+  text-shadow: 3px 3px rgb(44, 44, 44);
+}
+
+img {
+  box-shadow: 3px 3px 6px rgb(126, 126, 126);
+}
+
+select {
+  box-shadow: 1px 1px 2px rgb(205, 205, 205);
+}
+
+#submit {
+  box-shadow: 2px 2px 4px rgb(108, 108, 108);
+  color: #e0cdc2;
+  background-color: #403768;
+}
+
+select:focus,
+select:active {
+  outline-color: #403768;
+}
+
+dialog::backdrop {
+  background-color: rgba(0, 0, 0, 0.789);
+}
+
+.modal {
+  background-color: rgba(48, 48, 48, 0.829);
+}
+
+.aX:focus {
+  outline: 0;
+}
