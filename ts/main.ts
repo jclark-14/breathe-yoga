@@ -12,6 +12,8 @@ const $form = document.querySelector('form');
 const $search = document.querySelector('#search');
 const $xIcon = document.querySelector('.iconX');
 const $results = document.querySelector('#results-container');
+// const $solidHeart = document.querySelector('#solid-heart');
+// const $outlineHeart = document.querySelector('#outline-heart');
 
 if (
   !$submitSearch ||
@@ -27,6 +29,8 @@ if (
   !$xIcon ||
   !$search ||
   !$results
+  // !$solidHeart ||
+  // !$outlineHeart
 )
   throw new Error('HTML query failed');
 
@@ -138,7 +142,18 @@ function renderVideos(): HTMLDivElement {
     if (!$videoText) throw new Error('unable to create $videoText');
     $videoText.setAttribute('class', 'video-text w-80 pl-1 pt-1');
 
-    const $channelAnchor = $videoText.appendChild(document.createElement('a'));
+    const $channelHeartsDiv = $videoText.appendChild(
+      document.createElement('p'),
+    );
+    if (!$channelHeartsDiv) throw new Error('unable to create $hearts');
+    $channelHeartsDiv.setAttribute(
+      'class',
+      'flex justify-between items-center',
+    );
+
+    const $channelAnchor = $channelHeartsDiv.appendChild(
+      document.createElement('a'),
+    );
     if (!$channelAnchor) throw new Error('unable to create $channelAnchor');
     $channelAnchor.setAttribute(
       'href',
@@ -147,15 +162,39 @@ function renderVideos(): HTMLDivElement {
     $channelAnchor.setAttribute('class', 'channelAnchor');
     $channelAnchor.setAttribute('target', '_blank');
 
-    const $channel = $channelAnchor.appendChild(document.createElement('p'));
+    const $heartAnchor = $channelHeartsDiv.appendChild(
+      document.createElement('a'),
+    );
+    if (!$heartAnchor) throw new Error('$heartAnchor not present');
+    $heartAnchor.setAttribute('href', '#');
+
+    const $heartSolid = $heartAnchor.appendChild(document.createElement('i'));
+    if (!$heartSolid) throw new Error('$heart not created');
+    $heartSolid.setAttribute('id', 'solid-heart');
+    $heartSolid.setAttribute(
+      'class',
+      'fa-solid fa-heart fa-lg float-right pr-2 pb-1 hidden md:hidden',
+    );
+    $heartSolid.setAttribute('style', 'color: #403768');
+
+    const $heartOutline = $heartAnchor.appendChild(document.createElement('i'));
+    if (!$heartSolid) throw new Error('$heart not created');
+    $heartOutline.setAttribute('id', 'outline-heart');
+    $heartOutline.setAttribute(
+      'class',
+      'fa-regular fa-heart fa-lg float-right pr-2 pb-1',
+    );
+    $heartOutline.setAttribute('style', 'color: #403768');
+
+    const $channel = $channelAnchor.appendChild(document.createElement('span'));
     if (!$channel) throw new Error('unable to create $channel');
     $channel.setAttribute('class', 'font-medium text-lg underline channel');
     //  $channel.setAttribute('data', videoArr[i].channel);
     $channel.innerHTML = videoArr[i].channel;
 
-    const $title = $videoText.appendChild(document.createElement('span'));
+    const $title = $videoText.appendChild(document.createElement('p'));
     if (!$title) throw new Error('unable to create $title');
-    $title.setAttribute('class', 'font-normal text-md pr-4 w-80 max-w-80');
+    $title.setAttribute('class', 'font-normal text-md pr-4');
     $title.innerHTML = ' ' + videoArr[i].title;
   }
   return $resultsDiv;
