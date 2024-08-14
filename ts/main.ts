@@ -3,7 +3,8 @@ const $submitSearch = document.querySelector('#submit');
 const $landing = document.querySelector('#landing');
 const $formInputs = document.querySelectorAll('select');
 const $main = document.querySelector('main');
-const $iFrame = document.querySelector('iframe');
+const $iFrameLg = document.querySelector('.lg-screen');
+const $iFrameMobile = document.querySelector('.mobile');
 const $img = document.querySelectorAll('img');
 const $dialog = document.querySelector('dialog');
 const $body = document.querySelector('body');
@@ -14,7 +15,8 @@ const $results = document.querySelector('#results-container');
 
 if (
   !$submitSearch ||
-  !$iFrame ||
+  !$iFrameLg ||
+  !$iFrameMobile ||
   !$img ||
   !$dialog ||
   !$landing ||
@@ -69,18 +71,19 @@ async function searchYouTube(): Promise<void> {
       const description = item.snippet.description;
       const thumbnail = item.snippet.thumbnails.high.url;
       const channel = item.snippet.channelTitle;
+      const channelId = item.snippet.channelId;
       const video = {
         id,
         title,
         description,
         thumbnail,
         channel,
+        channelId,
       };
       videoArr.push(video);
     });
     renderVideos();
     previousUrl = url;
-    videoArr = [];
   } catch (error) {
     console.error('Error:', error);
   }
@@ -114,7 +117,6 @@ function renderVideos(): HTMLDivElement {
       document.createElement('div'),
     );
     if (!$videoContainer) throw new Error('$videoContainer creation error');
-
     $videoContainer.setAttribute('class', 'video-div basis-1/3 mx-auto mb-8');
 
     const $videoAnchor = $videoContainer.appendChild(
@@ -138,11 +140,17 @@ function renderVideos(): HTMLDivElement {
 
     const $channelAnchor = $videoText.appendChild(document.createElement('a'));
     if (!$channelAnchor) throw new Error('unable to create $channelAnchor');
-    $channelAnchor.setAttribute('href', '#');
+    $channelAnchor.setAttribute(
+      'href',
+      `https://www.youtube.com/channel/${videoArr[i].channelId}`,
+    );
+    $channelAnchor.setAttribute('class', 'channelAnchor');
+    $channelAnchor.setAttribute('target', '_blank');
 
     const $channel = $channelAnchor.appendChild(document.createElement('p'));
     if (!$channel) throw new Error('unable to create $channel');
-    $channel.setAttribute('class', 'font-medium text-lg underline');
+    $channel.setAttribute('class', 'font-medium text-lg underline channel');
+    //  $channel.setAttribute('data', videoArr[i].channel);
     $channel.innerHTML = videoArr[i].channel;
 
     const $title = $videoText.appendChild(document.createElement('span'));
@@ -155,10 +163,8 @@ function renderVideos(): HTMLDivElement {
 
 $body.addEventListener('click', (event: Event): void => {
   const $thumbnail = document.querySelectorAll('.thumbnail');
-  if (!$thumbnail) throw new Error('element not created');
 
   const eventTarget = event.target as HTMLElement;
-
   if (eventTarget === $submitSearch) {
     event.preventDefault();
     createUrl();
@@ -169,19 +175,21 @@ $body.addEventListener('click', (event: Event): void => {
     const $resultsDiv = document.querySelector('.results-div');
     if (url !== previousUrl && $resultsDiv !== null) {
       $resultsDiv.remove();
+      videoArr = [];
       searchYouTube();
       toggleView($results);
     } else {
+      videoArr = [];
       searchYouTube();
       toggleView($results);
     }
-
     $form?.reset();
   }
 
   if (eventTarget === $xIcon) {
     $dialog.close();
-    $iFrame.setAttribute('src', '');
+    $iFrameLg.setAttribute('src', '');
+    $iFrameMobile.setAttribute('src', '');
   }
 
   if (videoArr[0]) {
@@ -190,10 +198,12 @@ $body.addEventListener('click', (event: Event): void => {
         $dialog.showModal();
         const videoId = eventTarget.dataset.id;
         const formattedStr = `https://www.youtube.com/embed/${videoId}`;
-        $iFrame.setAttribute('src', formattedStr);
+        $iFrameLg.setAttribute('src', formattedStr);
+        $iFrameMobile.setAttribute('src', formattedStr);
       }
     }
   }
+
   if (eventTarget === $search) {
     toggleView($landing);
   }
@@ -203,7 +213,8 @@ $dialog.addEventListener('dblclick', (event: Event): void => {
   const eventTarget = event.target as HTMLElement;
   if (eventTarget === $dialog) {
     $dialog.close();
-    $iFrame.setAttribute('src', '');
+    $iFrameLg.setAttribute('src', '');
+    $iFrameMobile.setAttribute('src', '');
   }
 });
 
@@ -222,3 +233,4 @@ function toggleView(element: Element): void {
     );
   }
 }
+// $dialog.showModal();
