@@ -1,4 +1,4 @@
-const API_KEY = 'AIzaSyDFMMKvQu9eI1apQkQDi__onjn2vhhV-hU';
+const API_KEY = 'AIzaSyC1ooFAsCCpsb6kgDMct1kXJTtn0vp5AKc';
 const $submitSearch = document.querySelector('#submit');
 const $landing = document.querySelector('#landing');
 const $formInputs = document.querySelectorAll('select');
@@ -94,6 +94,7 @@ async function searchYouTube(): Promise<void> {
       videoArr.push(video);
     });
     renderSearch();
+    findMatches();
     previousUrl = url;
   } catch (error) {
     console.error('Error:', error);
@@ -103,31 +104,31 @@ async function searchYouTube(): Promise<void> {
 $body.addEventListener('click', (event: Event): void => {
   const $thumbnail = document.querySelectorAll('.thumbnail');
   const eventTarget = event.target as HTMLElement;
-
+  readJSON();
   if (eventTarget === $submitSearch) {
-    const $videos = document.querySelector('#video');
+    const $vidContainer = document.querySelector('.vidContainer');
     event.preventDefault();
     createUrl();
     if (url === previousUrl) {
+      findMatches();
       viewResults();
+
       return;
     }
-    if (url !== previousUrl && $videos) {
-      $videos.remove();
+    if (url !== previousUrl && $vidContainer) {
+      $vidContainer?.remove();
       videoArr = [];
       searchYouTube();
+
       viewResults();
     } else {
+      $vidContainer?.remove();
       videoArr = [];
       searchYouTube();
+
       viewResults();
     }
     $form?.reset();
-    readJSON();
-    for (let i = 0; i < favoritesArr.length; i++) {
-      const match = videoArr.find((video) => video === favoritesArr[i]);
-      console.log('match', match);
-    }
   }
 
   if (eventTarget === $xIcon) {
@@ -259,6 +260,45 @@ function viewFavorites(): void {
   }
 }
 
+function findMatches(): void {
+  const matches = [];
+  for (let i = 0; i < videoArr.length; i++) {
+    const vidId = videoArr[i].id;
+    for (let i = 0; i < favoritesArr.length; i++) {
+      if (vidId === favoritesArr[i].id) {
+        console.log('winnerwinner!');
+        matches.push(favoritesArr[i]);
+      }
+    }
+  }
+  const $solidHearts = document.querySelectorAll('.solid-heart');
+  console.log('solidhearts', $solidHearts);
+  const $outlineHearts = document.querySelectorAll('.outline-heart');
+  console.log('outline hearts', $outlineHearts);
+  for (let i = 0; i < matches.length; i++) {
+    console.log(matches);
+    console.log(matches[i].id);
+    const matchesId = matches[i].id;
+    for (let i = 0; i < $solidHearts.length; i++) {
+      const elementSolidHeart = $solidHearts[i] as HTMLElement;
+      const elementOutlineHeart = $outlineHearts[i] as HTMLElement;
+      console.log('element.id', elementSolidHeart.dataset.id);
+      if (elementSolidHeart.dataset.id === matchesId) {
+        console.log('finding hearts');
+        elementSolidHeart.setAttribute(
+          'class',
+          'fa-solid fa-heart fa-lg float-right pr-2 solid-heart',
+        );
+        elementOutlineHeart.setAttribute(
+          'class',
+          'fa-regular fa-heart fa-lg float-right pr-2 outline-heart hidden md:hidden',
+        );
+      }
+    }
+  }
+  console.log('matches', matches);
+}
+
 function renderFavorites(favoritesArr: Video[]): void {
   readJSON();
   const $favContainer = $favoriteVideos.appendChild(
@@ -355,8 +395,10 @@ function renderFavorites(favoritesArr: Video[]): void {
 }
 
 function renderSearch(): HTMLElement {
+  const $vidContainer = $videosDiv.appendChild(document.createElement('div'));
+  $vidContainer.setAttribute('class', 'vidContainer mx-auto flex flex-wrap');
   for (let i = 0; i < videoArr.length; i++) {
-    const $videoContainer = $videosDiv?.appendChild(
+    const $videoContainer = $vidContainer.appendChild(
       document.createElement('div'),
     );
     if (!$videoContainer) throw new Error('$videoContainer creation error');
@@ -419,7 +461,6 @@ function renderSearch(): HTMLElement {
 
     const $heartOutline = $heartAnchor.appendChild(document.createElement('i'));
     if (!$heartOutline) throw new Error('$heart not created');
-
     $heartOutline.setAttribute(
       'class',
       'fa-regular fa-heart fa-lg float-right pr-2 outline-heart',

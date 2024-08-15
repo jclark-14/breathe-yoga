@@ -1,5 +1,5 @@
 "use strict";
-const API_KEY = 'AIzaSyDFMMKvQu9eI1apQkQDi__onjn2vhhV-hU';
+const API_KEY = 'AIzaSyC1ooFAsCCpsb6kgDMct1kXJTtn0vp5AKc';
 const $submitSearch = document.querySelector('#submit');
 const $landing = document.querySelector('#landing');
 const $formInputs = document.querySelectorAll('select');
@@ -92,6 +92,7 @@ async function searchYouTube() {
             videoArr.push(video);
         });
         renderSearch();
+        findMatches();
         previousUrl = url;
     }
     catch (error) {
@@ -101,21 +102,24 @@ async function searchYouTube() {
 $body.addEventListener('click', (event) => {
     const $thumbnail = document.querySelectorAll('.thumbnail');
     const eventTarget = event.target;
+    readJSON();
     if (eventTarget === $submitSearch) {
-        const $videos = document.querySelector('#video');
+        const $vidContainer = document.querySelector('.vidContainer');
         event.preventDefault();
         createUrl();
         if (url === previousUrl) {
+            findMatches();
             viewResults();
             return;
         }
-        if (url !== previousUrl && $videos) {
-            $videos.remove();
+        if (url !== previousUrl && $vidContainer) {
+            $vidContainer?.remove();
             videoArr = [];
             searchYouTube();
             viewResults();
         }
         else {
+            $vidContainer?.remove();
             videoArr = [];
             searchYouTube();
             viewResults();
@@ -215,6 +219,38 @@ function viewFavorites() {
         $pNoFavorites?.setAttribute('class', ' text-lg text-center w-full mt-10');
     }
 }
+function findMatches() {
+    const matches = [];
+    for (let i = 0; i < videoArr.length; i++) {
+        const vidId = videoArr[i].id;
+        for (let i = 0; i < favoritesArr.length; i++) {
+            if (vidId === favoritesArr[i].id) {
+                console.log('winnerwinner!');
+                matches.push(favoritesArr[i]);
+            }
+        }
+    }
+    const $solidHearts = document.querySelectorAll('.solid-heart');
+    console.log('solidhearts', $solidHearts);
+    const $outlineHearts = document.querySelectorAll('.outline-heart');
+    console.log('outline hearts', $outlineHearts);
+    for (let i = 0; i < matches.length; i++) {
+        console.log(matches);
+        console.log(matches[i].id);
+        const matchesId = matches[i].id;
+        for (let i = 0; i < $solidHearts.length; i++) {
+            const elementSolidHeart = $solidHearts[i];
+            const elementOutlineHeart = $outlineHearts[i];
+            console.log('element.id', elementSolidHeart.dataset.id);
+            if (elementSolidHeart.dataset.id === matchesId) {
+                console.log('finding hearts');
+                elementSolidHeart.setAttribute('class', 'fa-solid fa-heart fa-lg float-right pr-2 solid-heart');
+                elementOutlineHeart.setAttribute('class', 'fa-regular fa-heart fa-lg float-right pr-2 outline-heart hidden md:hidden');
+            }
+        }
+    }
+    console.log('matches', matches);
+}
 function renderFavorites(favoritesArr) {
     readJSON();
     const $favContainer = $favoriteVideos.appendChild(document.createElement('div'));
@@ -280,8 +316,10 @@ function renderFavorites(favoritesArr) {
     }
 }
 function renderSearch() {
+    const $vidContainer = $videosDiv.appendChild(document.createElement('div'));
+    $vidContainer.setAttribute('class', 'vidContainer mx-auto flex flex-wrap');
     for (let i = 0; i < videoArr.length; i++) {
-        const $videoContainer = $videosDiv?.appendChild(document.createElement('div'));
+        const $videoContainer = $vidContainer.appendChild(document.createElement('div'));
         if (!$videoContainer)
             throw new Error('$videoContainer creation error');
         $videoContainer.setAttribute('class', 'video-div basis-1/3 mx-auto mb-8');
