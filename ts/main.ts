@@ -100,86 +100,6 @@ async function searchYouTube(): Promise<void> {
   }
 }
 
-function renderFavorites(video: Video): HTMLDivElement {
-  const $videoContainer = $favoriteVideos?.appendChild(
-    document.createElement('div'),
-  );
-  if (!$videoContainer) throw new Error('$videoContainer creation error');
-  $videoContainer.setAttribute(
-    'class',
-    'fav-video-div basis-1/3 px-2 mx-auto mb-8',
-  );
-
-  const $videoAnchor = $videoContainer.appendChild(document.createElement('a'));
-  if (!$videoAnchor) throw new Error('$videoAnchor creation error');
-  $videoAnchor.setAttribute('href', '#');
-  $videoAnchor.setAttribute('class', 'video');
-
-  const $thumbnail = $videoAnchor.appendChild(document.createElement('img'));
-  if (!$thumbnail) throw new Error('$thumbnail creation error');
-  $thumbnail.setAttribute('class', 'h-fit rounded-sm w-80 thumbnail');
-  $thumbnail.setAttribute('src', video.thumbnail);
-  $thumbnail.setAttribute('data-id', video.id);
-
-  const $videoText = $videoContainer.appendChild(document.createElement('div'));
-  if (!$videoText) throw new Error('unable to create $videoText');
-  $videoText.setAttribute('class', 'video-text w-80 pl-1 pt-1');
-
-  const $channelHeartsDiv = $videoText.appendChild(document.createElement('p'));
-  if (!$channelHeartsDiv) throw new Error('unable to create $hearts');
-  $channelHeartsDiv.setAttribute('class', 'flex justify-between items-center');
-
-  const $channelAnchor = $channelHeartsDiv.appendChild(
-    document.createElement('a'),
-  );
-  if (!$channelAnchor) throw new Error('unable to create $channelAnchor');
-  $channelAnchor.setAttribute(
-    'href',
-    `https://www.youtube.com/channel/${video.channelId}`,
-  );
-  $channelAnchor.setAttribute('class', 'channelAnchor');
-  $channelAnchor.setAttribute('target', '_blank');
-
-  const $heartAnchor = $channelHeartsDiv.appendChild(
-    document.createElement('a'),
-  );
-  if (!$heartAnchor) throw new Error('$heartAnchor not present');
-  $heartAnchor.setAttribute('href', '#');
-
-  const $heartSolid = $heartAnchor.appendChild(document.createElement('i'));
-  if (!$heartSolid) throw new Error('$heart not created');
-
-  $heartSolid.setAttribute(
-    'class',
-    'fa-solid fa-heart fa-lg float-right pr-2  solid-heart',
-  );
-  $heartSolid.setAttribute('style', 'color: #403768');
-  $heartSolid.setAttribute('data-id', video.id);
-
-  const $heartOutline = $heartAnchor.appendChild(document.createElement('i'));
-  if (!$heartOutline) throw new Error('$heart not created');
-
-  $heartOutline.setAttribute(
-    'class',
-    'fa-regular fa-heart fa-lg float-right pr-2 outline-heart hidden md:hidden',
-  );
-  $heartOutline.setAttribute('style', 'color: #403768');
-  $heartOutline.setAttribute('data-id', video.id);
-
-  const $channel = $channelAnchor.appendChild(document.createElement('span'));
-  if (!$channel) throw new Error('unable to create $channel');
-  $channel.setAttribute('class', 'font-medium text-lg underline channel');
-  $channel.innerHTML = video.channel;
-
-  const $title = $videoText.appendChild(document.createElement('p'));
-  if (!$title) throw new Error('unable to create $title');
-  $title.setAttribute('class', 'font-normal text-md pr-4');
-  $title.innerHTML = ' ' + video.title;
-
-  if (!$favoriteVideos) throw new Error('$failed at render');
-  return $favoriteVideos;
-}
-
 $body.addEventListener('click', (event: Event): void => {
   const $thumbnail = document.querySelectorAll('.thumbnail');
   const eventTarget = event.target as HTMLElement;
@@ -203,6 +123,11 @@ $body.addEventListener('click', (event: Event): void => {
       viewResults();
     }
     $form?.reset();
+    readJSON();
+    for (let i = 0; i < favoritesArr.length; i++) {
+      const match = videoArr.find((video) => video === favoritesArr[i]);
+      console.log('match', match);
+    }
   }
 
   if (eventTarget === $xIcon) {
@@ -222,33 +147,50 @@ $body.addEventListener('click', (event: Event): void => {
       }
     }
   }
-
+  const $solidHearts = document.querySelectorAll('.solid-heart');
+  const $outlineHearts = document.querySelectorAll('.outline-heart');
+  if (!$solidHearts || !$outlineHearts) throw new Error('$hearts query failed');
   if (eventTarget.matches('.outline-heart')) {
-    const $solidHearts = document.querySelectorAll('.solid-heart');
-    const $outlineHearts = document.querySelectorAll('.outline-heart');
-    if ($solidHearts && $outlineHearts) {
-      const video = videoArr.find(
-        (video) => video.id === eventTarget.dataset.id,
-      ) as Video;
+    const video = videoArr.find(
+      (video) => video.id === eventTarget.dataset.id,
+    ) as Video;
+    if (favoritesArr.indexOf(video) < 0) {
       favoritesArr.push(video);
       writeJSON();
-      renderFavorites(video);
-      for (let i = 0; i < $solidHearts.length; i++) {
-        const element = $solidHearts[i] as HTMLElement;
-        if (element.dataset.id === eventTarget.dataset.id) {
-          element.setAttribute(
-            'class',
-            'fa-solid fa-heart fa-lg float-right pr-2 solid-heard',
-          );
-        }
+    }
+    for (let i = 0; i < $solidHearts.length; i++) {
+      const elementSolidHeart = $solidHearts[i] as HTMLElement;
+      const elementOutlineHeart = $outlineHearts[i] as HTMLElement;
+      if (elementSolidHeart.dataset.id === eventTarget.dataset.id) {
+        elementSolidHeart.setAttribute(
+          'class',
+          'fa-solid fa-heart fa-lg float-right pr-2 solid-heart ',
+        );
+        elementOutlineHeart.setAttribute(
+          'class',
+          'fa-outline fa-heart fa-lg float-right pr-2 outline-heart hidden md:hidden',
+        );
       }
     }
-    for (let i = 0; i < $outlineHearts.length; i++) {
-      const element = $outlineHearts[i] as HTMLElement;
-      if (element.dataset.id === eventTarget.dataset.id) {
-        element.setAttribute(
+  }
+
+  if (eventTarget.matches('.solid-heart')) {
+    const videoIndex = favoritesArr.findIndex(
+      (video) => video.id === eventTarget.dataset.id,
+    );
+    favoritesArr.splice(videoIndex, 1);
+    writeJSON();
+    for (let i = 0; i < $solidHearts.length; i++) {
+      const elementSolidHeart = $solidHearts[i] as HTMLElement;
+      const elementOutlineHeart = $outlineHearts[i] as HTMLElement;
+      if (elementSolidHeart.dataset.id === eventTarget.dataset.id) {
+        elementSolidHeart.setAttribute(
           'class',
-          'fa-regular fa-heart fa-lg float-right pr-2 outline-heart hidden md:hidden',
+          'fa-solid fa-heart fa-lg float-right pr-2 solid-heart hidden md:hidden',
+        );
+        elementOutlineHeart.setAttribute(
+          'class',
+          'fa-regular fa-heart fa-lg float-right pr-2 outline-heart',
         );
       }
     }
@@ -274,7 +216,7 @@ $dialog.addEventListener('dblclick', (event: Event): void => {
 
 document.addEventListener('DOMContentLoaded', () => {
   readJSON();
-  favoritesArr.forEach((video) => renderFavorites(video));
+  renderFavorites(favoritesArr);
 });
 
 function viewLanding(): void {
@@ -302,16 +244,117 @@ function viewFavorites(): void {
     'hidden md:hidden container md:pt-14 px-4 md:px-0 pt-8 mx-auto flex flex-wrap md:flex-nowrap max-w-screen-lg',
   );
   $favoritesDiv?.setAttribute('class', 'favorites-container');
-  const $favVideo = document.querySelector('.fav-video-div');
-  if ($favVideo) {
+  const $favContainer = document.querySelector('.favContainer');
+  if ($favContainer) {
+    $favContainer.remove();
+    renderFavorites(favoritesArr);
+  }
+  if (favoritesArr[0]) {
     $pNoFavorites?.setAttribute(
       'class',
       'hidden md:hidden text-lg text-center w-full mt-10',
     );
+  } else if (!favoritesArr[0]) {
+    $pNoFavorites?.setAttribute('class', ' text-lg text-center w-full mt-10');
   }
 }
 
-function renderSearch(): HTMLDivElement {
+function renderFavorites(favoritesArr: Video[]): void {
+  readJSON();
+  const $favContainer = $favoriteVideos.appendChild(
+    document.createElement('div'),
+  );
+  $favContainer.setAttribute('class', 'favContainer mx-auto flex flex-wrap');
+
+  for (let i = 0; i < favoritesArr.length; i++) {
+    const $videoContainer = $favContainer?.appendChild(
+      document.createElement('div'),
+    );
+    if (!$videoContainer) throw new Error('$videoContainer creation error');
+    $videoContainer.setAttribute(
+      'class',
+      'fav-video-div basis-1/3 px-2 mx-auto mb-8',
+    );
+
+    const $videoAnchor = $videoContainer.appendChild(
+      document.createElement('a'),
+    );
+    if (!$videoAnchor) throw new Error('$videoAnchor creation error');
+    $videoAnchor.setAttribute('href', '#');
+    $videoAnchor.setAttribute('class', 'video');
+
+    const $thumbnail = $videoAnchor.appendChild(document.createElement('img'));
+    if (!$thumbnail) throw new Error('$thumbnail creation error');
+    $thumbnail.setAttribute('class', 'h-fit rounded-sm w-80 thumbnail');
+    $thumbnail.setAttribute('src', favoritesArr[i]?.thumbnail);
+    $thumbnail.setAttribute('data-id', favoritesArr[i]?.id);
+
+    const $videoText = $videoContainer.appendChild(
+      document.createElement('div'),
+    );
+    if (!$videoText) throw new Error('unable to create $videoText');
+    $videoText.setAttribute('class', 'video-text w-80 pl-1 pt-1');
+
+    const $channelHeartsDiv = $videoText.appendChild(
+      document.createElement('p'),
+    );
+    if (!$channelHeartsDiv) throw new Error('unable to create $hearts');
+    $channelHeartsDiv.setAttribute(
+      'class',
+      'flex justify-between items-center',
+    );
+
+    const $channelAnchor = $channelHeartsDiv.appendChild(
+      document.createElement('a'),
+    );
+    if (!$channelAnchor) throw new Error('unable to create $channelAnchor');
+    $channelAnchor?.setAttribute(
+      'href',
+      `https://www.youtube.com/channel/${favoritesArr[i].channelId}`,
+    );
+    $channelAnchor.setAttribute('class', 'channelAnchor');
+    $channelAnchor.setAttribute('target', '_blank');
+
+    const $heartAnchor = $channelHeartsDiv.appendChild(
+      document.createElement('a'),
+    );
+    if (!$heartAnchor) throw new Error('$heartAnchor not present');
+    $heartAnchor.setAttribute('href', '#');
+
+    const $heartSolid = $heartAnchor.appendChild(document.createElement('i'));
+    if (!$heartSolid) throw new Error('$heart not created');
+
+    $heartSolid.setAttribute(
+      'class',
+      'fa-solid fa-heart fa-lg float-right pr-2  solid-heart',
+    );
+    $heartSolid.setAttribute('style', 'color: #403768');
+    $heartSolid.setAttribute('data-id', favoritesArr[i]?.id);
+
+    const $heartOutline = $heartAnchor.appendChild(document.createElement('i'));
+    if (!$heartOutline) throw new Error('$heart not created');
+    $heartOutline.setAttribute(
+      'class',
+      'fa-regular fa-heart fa-lg float-right pr-2 outline-heart hidden md:hidden',
+    );
+    $heartOutline.setAttribute('style', 'color: #403768');
+    $heartOutline.setAttribute('data-id', favoritesArr[i].id);
+
+    const $channel = $channelAnchor.appendChild(document.createElement('span'));
+    if (!$channel) throw new Error('unable to create $channel');
+    $channel.setAttribute('class', 'font-medium text-lg underline channel');
+    $channel.innerHTML = favoritesArr[i]?.channel;
+
+    const $title = $videoText.appendChild(document.createElement('p'));
+    if (!$title) throw new Error('unable to create $title');
+    $title.setAttribute('class', 'font-normal text-md pr-4');
+    $title.innerHTML = ' ' + favoritesArr[i]?.title;
+
+    if (!$favoriteVideos) throw new Error('$failed at render');
+  }
+}
+
+function renderSearch(): HTMLElement {
   for (let i = 0; i < videoArr.length; i++) {
     const $videoContainer = $videosDiv?.appendChild(
       document.createElement('div'),
@@ -351,7 +394,7 @@ function renderSearch(): HTMLDivElement {
       document.createElement('a'),
     );
     if (!$channelAnchor) throw new Error('unable to create $channelAnchor');
-    $channelAnchor.setAttribute(
+    $channelAnchor?.setAttribute(
       'href',
       `https://www.youtube.com/channel/${videoArr[i].channelId}`,
     );
