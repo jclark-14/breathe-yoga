@@ -11,5 +11,5 @@ function readJSON() {
         return favoritesArr;
     }
     favoritesArr = [];
-    return [];
+    return favoritesArr;
 }

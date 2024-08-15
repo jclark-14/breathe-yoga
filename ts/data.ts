@@ -26,9 +26,8 @@ function readJSON(): Video[] {
   const returnJSON = localStorage.getItem('video-storage') as string;
   if (returnJSON) {
     favoritesArr = JSON.parse(returnJSON);
-
     return favoritesArr;
   }
   favoritesArr = [];
-  return [];
+  return favoritesArr;
 }
