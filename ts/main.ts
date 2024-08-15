@@ -123,6 +123,11 @@ $body.addEventListener('click', (event: Event): void => {
       viewResults();
     }
     $form?.reset();
+    readJSON();
+    for (let i = 0; i < favoritesArr.length; i++) {
+      const match = videoArr.find((video) => video === favoritesArr[i]);
+      console.log('match', match);
+    }
   }
 
   if (eventTarget === $xIcon) {
