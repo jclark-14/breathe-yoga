@@ -43,7 +43,7 @@ if (
 
 let previousUrl: string;
 let url: string;
-let videoArr: Video[] = [];
+let viewIndex: number;
 
 function createUrl(): void {
   const inputs: SearchInputs = {
@@ -76,6 +76,7 @@ async function searchYouTube(): Promise<void> {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
     const videos = await response.json();
+    videoArr = [];
     videos.items.forEach((item: any) => {
       const id = item.id.videoId;
       const title = item.snippet.title;
@@ -93,6 +94,7 @@ async function searchYouTube(): Promise<void> {
       };
       videoArr.push(video);
     });
+    writeSearchJSON();
     renderSearch();
     findMatches();
     previousUrl = url;
@@ -112,20 +114,15 @@ $body.addEventListener('click', (event: Event): void => {
     if (url === previousUrl) {
       findMatches();
       viewResults();
-
       return;
     }
     if (url !== previousUrl && $vidContainer) {
       $vidContainer?.remove();
-      videoArr = [];
       searchYouTube();
-
       viewResults();
     } else {
       $vidContainer?.remove();
-      videoArr = [];
       searchYouTube();
-
       viewResults();
     }
     $form?.reset();
@@ -148,6 +145,7 @@ $body.addEventListener('click', (event: Event): void => {
       }
     }
   }
+
   const $solidHearts = document.querySelectorAll('.solid-heart');
   const $outlineHearts = document.querySelectorAll('.outline-heart');
   if (!$solidHearts || !$outlineHearts) throw new Error('$hearts query failed');
@@ -157,7 +155,7 @@ $body.addEventListener('click', (event: Event): void => {
     ) as Video;
     if (favoritesArr.indexOf(video) < 0) {
       favoritesArr.push(video);
-      writeJSON();
+      writeVidJSON();
     }
     for (let i = 0; i < $solidHearts.length; i++) {
       const elementSolidHeart = $solidHearts[i] as HTMLElement;
@@ -180,7 +178,7 @@ $body.addEventListener('click', (event: Event): void => {
       (video) => video.id === eventTarget.dataset.id,
     );
     favoritesArr.splice(videoIndex, 1);
-    writeJSON();
+    writeVidJSON();
     for (let i = 0; i < $solidHearts.length; i++) {
       const elementSolidHeart = $solidHearts[i] as HTMLElement;
       const elementOutlineHeart = $outlineHearts[i] as HTMLElement;
@@ -218,6 +216,15 @@ $dialog.addEventListener('dblclick', (event: Event): void => {
 document.addEventListener('DOMContentLoaded', () => {
   readJSON();
   renderFavorites(favoritesArr);
+  readViewJSON();
+  renderSearch();
+  if (viewIndex === 1) {
+    viewLanding();
+  } else if (viewIndex === 2) {
+    viewResults();
+  } else if (viewIndex === 3) {
+    viewFavorites();
+  }
 });
 
 function viewLanding(): void {
@@ -227,6 +234,8 @@ function viewLanding(): void {
   );
   $favoritesDiv?.setAttribute('class', 'favorites-container hidden md:hidden');
   $results?.setAttribute('class', 'hidden md:hidden');
+  viewIndex = 1;
+  writeViewJSON();
 }
 
 function viewResults(): void {
@@ -236,6 +245,8 @@ function viewResults(): void {
     'hidden md:hidden container md:pt-14 px-4 md:px-0 pt-8 mx-auto flex flex-wrap md:flex-nowrap max-w-screen-lg',
   );
   $favoritesDiv?.setAttribute('class', 'favorites-container hidden md:hidden');
+  viewIndex = 2;
+  writeViewJSON();
 }
 
 function viewFavorites(): void {
@@ -258,6 +269,8 @@ function viewFavorites(): void {
   } else if (!favoritesArr[0]) {
     $pNoFavorites?.setAttribute('class', ' text-lg text-center w-full mt-10');
   }
+  viewIndex = 3;
+  writeViewJSON();
 }
 
 function findMatches(): void {
@@ -266,25 +279,18 @@ function findMatches(): void {
     const vidId = videoArr[i].id;
     for (let i = 0; i < favoritesArr.length; i++) {
       if (vidId === favoritesArr[i].id) {
-        console.log('winnerwinner!');
         matches.push(favoritesArr[i]);
       }
     }
   }
   const $solidHearts = document.querySelectorAll('.solid-heart');
-  console.log('solidhearts', $solidHearts);
   const $outlineHearts = document.querySelectorAll('.outline-heart');
-  console.log('outline hearts', $outlineHearts);
   for (let i = 0; i < matches.length; i++) {
-    console.log(matches);
-    console.log(matches[i].id);
     const matchesId = matches[i].id;
     for (let i = 0; i < $solidHearts.length; i++) {
       const elementSolidHeart = $solidHearts[i] as HTMLElement;
       const elementOutlineHeart = $outlineHearts[i] as HTMLElement;
-      console.log('element.id', elementSolidHeart.dataset.id);
       if (elementSolidHeart.dataset.id === matchesId) {
-        console.log('finding hearts');
         elementSolidHeart.setAttribute(
           'class',
           'fa-solid fa-heart fa-lg float-right pr-2 solid-heart',
@@ -296,7 +302,6 @@ function findMatches(): void {
       }
     }
   }
-  console.log('matches', matches);
 }
 
 function renderFavorites(favoritesArr: Video[]): void {
@@ -305,7 +310,6 @@ function renderFavorites(favoritesArr: Video[]): void {
     document.createElement('div'),
   );
   $favContainer.setAttribute('class', 'favContainer mx-auto flex flex-wrap');
-
   for (let i = 0; i < favoritesArr.length; i++) {
     const $videoContainer = $favContainer?.appendChild(
       document.createElement('div'),
@@ -389,12 +393,11 @@ function renderFavorites(favoritesArr: Video[]): void {
     if (!$title) throw new Error('unable to create $title');
     $title.setAttribute('class', 'font-normal text-md pr-4');
     $title.innerHTML = ' ' + favoritesArr[i]?.title;
-
-    if (!$favoriteVideos) throw new Error('$failed at render');
   }
 }
 
 function renderSearch(): HTMLElement {
+  readSearchJSON();
   const $vidContainer = $videosDiv.appendChild(document.createElement('div'));
   $vidContainer.setAttribute('class', 'vidContainer mx-auto flex flex-wrap');
   for (let i = 0; i < videoArr.length; i++) {

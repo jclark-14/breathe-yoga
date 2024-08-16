@@ -16,10 +16,30 @@ interface Video {
 }
 
 let favoritesArr: Video[] = [];
+let videoArr: Video[] = [];
 
-function writeJSON(): void {
+function writeVidJSON(): void {
   const videoJSONs = JSON.stringify(favoritesArr);
   localStorage.setItem('video-storage', videoJSONs);
+}
+
+function writeViewJSON(): void {
+  const viewJSON = JSON.stringify(viewIndex);
+  localStorage.setItem('view-index', viewJSON);
+}
+
+function writeSearchJSON(): void {
+  const searchJSON = JSON.stringify(videoArr);
+  localStorage.setItem('search-results', searchJSON);
+}
+
+function readSearchJSON(): Video[] {
+  const readSearch = localStorage.getItem('search-results');
+  if (readSearch) {
+    videoArr = JSON.parse(readSearch);
+    return videoArr;
+  }
+  return videoArr;
 }
 
 function readJSON(): Video[] {
@@ -30,4 +50,13 @@ function readJSON(): Video[] {
   }
   favoritesArr = [];
   return favoritesArr;
+}
+
+function readViewJSON(): number {
+  const returnViewJSON = localStorage.getItem('view-index');
+  if (returnViewJSON) {
+    viewIndex = JSON.parse(returnViewJSON);
+    return viewIndex;
+  }
+  return viewIndex;
 }
