@@ -15,48 +15,29 @@ interface Video {
   channelId: string;
 }
 
-let favoritesArr: Video[] = [];
-let videoArr: Video[] = [];
+interface Data {
+  favoritesArr: Video[];
+  searchArr: Video[];
+  viewIndex?: number;
+}
+const favoritesArr: Video[] = [];
+const searchArr: Video[] = [];
 
-function writeVidJSON(): void {
-  const videoJSONs = JSON.stringify(favoritesArr);
-  localStorage.setItem('video-storage', videoJSONs);
+let data: Data = {
+  favoritesArr,
+  searchArr,
+};
+
+function writeJSON(): void {
+  const dataJSON = JSON.stringify(data);
+  localStorage.setItem('data', dataJSON);
 }
 
-function writeViewJSON(): void {
-  const viewJSON = JSON.stringify(viewIndex);
-  localStorage.setItem('view-index', viewJSON);
-}
-
-function writeSearchJSON(): void {
-  const searchJSON = JSON.stringify(videoArr);
-  localStorage.setItem('search-results', searchJSON);
-}
-
-function readSearchJSON(): Video[] {
-  const readSearch = localStorage.getItem('search-results');
-  if (readSearch) {
-    videoArr = JSON.parse(readSearch);
-    return videoArr;
+function readJSON(): Data {
+  const readData = localStorage.getItem('data');
+  if (readData) {
+    data = JSON.parse(readData);
+    return data;
   }
-  return videoArr;
-}
-
-function readJSON(): Video[] {
-  const returnJSON = localStorage.getItem('video-storage') as string;
-  if (returnJSON) {
-    favoritesArr = JSON.parse(returnJSON);
-    return favoritesArr;
-  }
-  favoritesArr = [];
-  return favoritesArr;
-}
-
-function readViewJSON(): number {
-  const returnViewJSON = localStorage.getItem('view-index');
-  if (returnViewJSON) {
-    viewIndex = JSON.parse(returnViewJSON);
-    return viewIndex;
-  }
-  return viewIndex;
+  return data;
 }
