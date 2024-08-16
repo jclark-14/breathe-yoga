@@ -18,16 +18,17 @@
     <link rel="stylesheet" href="css/layout.css" />
     <link rel="stylesheet" href="css/styles.css" />
   </head>
-  <body>
+  <body class="overflow-y-scroll">
     <header class="w-full px-6">
       <div
-        class="flex justify-between items-center mx-auto max-w-screen-lg container md:px-1">
+        class="flex justify-between items-center mx-auto max-w-screen-lg container">
         <div>
-          <h1 class="text-3xl py-4 font-normal">Breathe Yoga</h1>
+          <h1 class="md:text-3xl text-2xl py-4 font-normal">Breathe Yoga</h1>
         </div>
-        <div class="text-lg font-light relative top-1 md:top-0">
-          <a id="search" href="#">Search</a>
-          <a id="favorites" href="#" class="md:ml-9 ml-2">Favorites</a>
+        <div class="text-md md:text-lg font-light relative top-1 md:top-0">
+          <a id="search" href="#" class="md:ml-6 mr-1">New Search</a>
+          <a id="results" href="#" class="md:ml-6 mr-1">Results</a>
+          <a id="favorites" href="#" class="md:ml-6">Favorites</a>
         </div>
       </div>
     </header>
@@ -98,7 +99,7 @@
             </form>
           </div>
         </div>
-        <div class="my-8 pr-4 pb-4 basis-1/2 hidden md:block">
+        <div class="my-8 pr-1 pb-4 basis-1/2 hidden md:block">
           <img
             class="rounded-lg h-full"
             src="https://i.ibb.co/12np2Ln/pexels-elly-fairytale-3822648.jpg"
@@ -109,7 +110,7 @@
         <div
           class="results-div container md:pt-10 pt-8 mx-auto md:flex flex-wrap max-w-screen-lg">
           <h2
-            class="text-3xl font-medium md:pl-2 md:pr-10 md:mb-10 w-full pl-8">
+            class="text-3xl font-medium md:pl-0 md:pr-10 md:mb-10 w-full pl-8">
             Results
           </h2>
           <div
@@ -120,7 +121,7 @@
         <div
           class="container md:pt-10 pt-8 mx-auto md:flex flex-wrap max-w-screen-lg">
           <h2
-            class="text-3xl font-medium md:pl-2 md:pr-10 md:mb-10 w-full pl-8">
+            class="text-3xl font-medium md:pl-0 md:pr-10 md:mb-10 w-full pl-8">
             Favorite Videos
           </h2>
           <p id="p.no-favorites" class="pfav text-lg text-center w-full mt-10">
@@ -143,8 +144,8 @@
           class="hidden md:flex lg-screen"
           loading="lazy"
           title="yoga video"
-          width="1047"
-          height="591"
+          width="1080"
+          height="608"
           allowfullscreen="true"
           src="https://www.youtube.com/embed/v7SN-d4qXx0">
         </iframe>

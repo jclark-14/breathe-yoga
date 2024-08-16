@@ -11,6 +11,7 @@ const $body = document.querySelector('body');
 const $form = document.querySelector('form');
 const $search = document.querySelector('#search');
 const $favorites = document.querySelector('#favorites');
+const $resultsNav = document.querySelector('#results');
 const $favoritesDiv = document.querySelector('#favorites-div');
 const $favoriteVideos = document.querySelector(
   '#favorite-videos',
@@ -19,6 +20,7 @@ const $xIcon = document.querySelector('.iconX');
 const $results = document.querySelector('#results-container');
 const $videosDiv = document.querySelector('.videos-div') as HTMLDivElement;
 const $pNoFavorites = document.querySelector('.pfav');
+
 if (
   !$submitSearch ||
   !$iFrameLg ||
@@ -37,11 +39,11 @@ if (
   !$favoritesDiv ||
   !$videosDiv ||
   !$favoriteVideos ||
-  !$pNoFavorites
+  !$pNoFavorites ||
+  !$resultsNav
 )
   throw new Error('HTML query failed');
 
-let previousUrl: string;
 let url: string;
 
 function createUrl(): void {
@@ -74,8 +76,9 @@ async function searchYouTube(): Promise<void> {
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
+    data.searchArr.length = 0;
     const videos = await response.json();
-    searchArr.length = 0;
+
     videos.items.forEach((item: any) => {
       const id = item.id.videoId;
       const title = item.snippet.title;
@@ -91,12 +94,11 @@ async function searchYouTube(): Promise<void> {
         channel,
         channelId,
       };
-      searchArr.push(video);
+      data.searchArr.push(video);
     });
     writeJSON();
     renderSearch();
     findMatches();
-    previousUrl = url;
   } catch (error) {
     console.error('Error:', error);
   }
@@ -109,22 +111,17 @@ $body.addEventListener('click', (event: Event): void => {
   if (eventTarget === $submitSearch) {
     const $vidContainer = document.querySelector('.vidContainer');
     event.preventDefault();
-    createUrl();
-    if (url === previousUrl) {
-      findMatches();
-      viewResults();
-      return;
-    }
-    if (url !== previousUrl && $vidContainer) {
+    if ($vidContainer) {
       $vidContainer?.remove();
       searchYouTube();
       viewResults();
-    } else {
-      $vidContainer?.remove();
-      searchYouTube();
-      viewResults();
+      $form?.reset();
     }
-    $form?.reset();
+  }
+
+  if (eventTarget === $resultsNav) {
+    findMatches();
+    viewResults();
   }
 
   if (eventTarget === $xIcon) {
@@ -216,6 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
   readJSON();
   renderFavorites();
   renderSearch();
+  findMatches();
   if (data.viewIndex === 1) {
     viewLanding();
   } else if (data.viewIndex === 2) {
@@ -231,7 +229,7 @@ function viewLanding(): void {
     'container md:pt-14 px-4 md:px-0 pt-8 mx-auto flex flex-wrap md:flex-nowrap max-w-screen-lg',
   );
   $favoritesDiv?.setAttribute('class', 'favorites-container hidden md:hidden');
-  $results?.setAttribute('class', 'hidden md:hidden');
+  $results?.setAttribute('class', 'container hidden md:hidden');
   data.viewIndex = 1;
   writeJSON();
 }
@@ -243,6 +241,7 @@ function viewResults(): void {
     'hidden md:hidden container md:pt-14 px-4 md:px-0 pt-8 mx-auto flex flex-wrap md:flex-nowrap max-w-screen-lg',
   );
   $favoritesDiv?.setAttribute('class', 'favorites-container hidden md:hidden');
+
   data.viewIndex = 2;
   writeJSON();
 }
@@ -254,6 +253,7 @@ function viewFavorites(): void {
     'hidden md:hidden container md:pt-14 px-4 md:px-0 pt-8 mx-auto flex flex-wrap md:flex-nowrap max-w-screen-lg',
   );
   $favoritesDiv?.setAttribute('class', 'favorites-container');
+
   const $favContainer = document.querySelector('.favContainer');
   if ($favContainer) {
     $favContainer.remove();
@@ -274,7 +274,7 @@ function viewFavorites(): void {
 function findMatches(): void {
   const matches = [];
   for (let i = 0; i < data.searchArr.length; i++) {
-    const vidId = searchArr[i].id;
+    const vidId = data.searchArr[i].id;
     for (let i = 0; i < data.favoritesArr.length; i++) {
       if (vidId === data.favoritesArr[i].id) {
         matches.push(data.favoritesArr[i]);
@@ -307,16 +307,16 @@ function renderFavorites(): void {
   const $favContainer = $favoriteVideos.appendChild(
     document.createElement('div'),
   );
-  $favContainer.setAttribute('class', 'favContainer mx-auto flex flex-wrap');
+  $favContainer.setAttribute(
+    'class',
+    'favContainer mx-auto flex flex-wrap justify-between',
+  );
   for (let i = 0; i < data.favoritesArr.length; i++) {
     const $videoContainer = $favContainer?.appendChild(
       document.createElement('div'),
     );
     if (!$videoContainer) throw new Error('$videoContainer creation error');
-    $videoContainer.setAttribute(
-      'class',
-      'fav-video-div basis-1/3 px-2 mx-auto mb-8',
-    );
+    $videoContainer.setAttribute('class', 'fav-video-div basis-1/3 mb-8');
 
     const $videoAnchor = $videoContainer.appendChild(
       document.createElement('a'),
@@ -397,13 +397,16 @@ function renderFavorites(): void {
 function renderSearch(): HTMLElement {
   readJSON();
   const $vidContainer = $videosDiv.appendChild(document.createElement('div'));
-  $vidContainer.setAttribute('class', 'vidContainer mx-auto flex flex-wrap');
+  $vidContainer.setAttribute(
+    'class',
+    'vidContainer mx-auto flex flex-wrap justify-between',
+  );
   for (let i = 0; i < data.searchArr.length; i++) {
     const $videoContainer = $vidContainer.appendChild(
       document.createElement('div'),
     );
     if (!$videoContainer) throw new Error('$videoContainer creation error');
-    $videoContainer.setAttribute('class', 'video-div basis-1/3 mx-auto mb-8');
+    $videoContainer.setAttribute('class', 'video-div basis-1/3 mb-8');
 
     const $videoAnchor = $videoContainer.appendChild(
       document.createElement('a'),
