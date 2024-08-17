@@ -2,10 +2,11 @@
 const favoritesArr = [];
 const searchArr = [];
 let data = {
-    favoritesArr,
     searchArr,
+    favoritesArr,
 };
 function writeJSON() {
+    console.log('writeJSON called');
     const dataJSON = JSON.stringify(data);
     localStorage.setItem('data', dataJSON);
 }

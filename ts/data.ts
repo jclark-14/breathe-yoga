@@ -13,6 +13,7 @@ interface Video {
   thumbnail: string;
   channel: string;
   channelId: string;
+  favorite: boolean;
 }
 
 interface Data {
@@ -20,15 +21,17 @@ interface Data {
   searchArr: Video[];
   viewIndex?: number;
 }
+
 const favoritesArr: Video[] = [];
 const searchArr: Video[] = [];
 
 let data: Data = {
-  favoritesArr,
   searchArr,
+  favoritesArr,
 };
 
 function writeJSON(): void {
+  console.log('writeJSON called');
   const dataJSON = JSON.stringify(data);
   localStorage.setItem('data', dataJSON);
 }

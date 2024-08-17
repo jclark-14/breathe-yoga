@@ -13,8 +13,10 @@ const $form = document.querySelector('form');
 const $search = document.querySelector('#search');
 const $favorites = document.querySelector('#favorites');
 const $resultsNav = document.querySelector('#results');
-const $favoritesDiv = document.querySelector('#favorites-div');
-const $favoriteVideos = document.querySelector('#favorite-videos');
+// const $favoritesDiv = document.querySelector('#favorites-div');
+// const $favoriteVideos = document.querySelector(
+//   '#favorite-videos',
+// ) as HTMLDivElement;
 const $xIcon = document.querySelector('.iconX');
 const $results = document.querySelector('#results-container');
 const $videosDiv = document.querySelector('.videos-div');
@@ -33,13 +35,15 @@ if (!$submitSearch ||
     !$search ||
     !$results ||
     !$favorites ||
-    !$favoritesDiv ||
+    // !$favoritesDiv ||
     !$videosDiv ||
-    !$favoriteVideos ||
+    // !$favoriteVideos ||
     !$pNoFavorites ||
     !$resultsNav)
     throw new Error('HTML query failed');
 let url;
+let renderI;
+const favorite = true || false;
 function createUrl() {
     const inputs = {
         level: $formInputs[0].value,
@@ -89,12 +93,19 @@ async function searchYouTube() {
                 thumbnail,
                 channel,
                 channelId,
+                favorite,
             };
+            if (data.favoritesArr.indexOf(video) < 0) {
+                video.favorite = false;
+            }
+            else {
+                video.favorite = true;
+            }
             data.searchArr.push(video);
         });
         writeJSON();
-        renderSearch();
-        findMatches();
+        renderI = 'search';
+        renderVideos(renderI);
     }
     catch (error) {
         console.error('Error:', error);
@@ -105,18 +116,11 @@ $body.addEventListener('click', (event) => {
     const eventTarget = event.target;
     readJSON();
     if (eventTarget === $submitSearch) {
-        const $vidContainer = document.querySelector('.vidContainer');
         event.preventDefault();
-        if ($vidContainer) {
-            $vidContainer?.remove();
-            searchYouTube();
-            viewResults();
-            $form?.reset();
-        }
-    }
-    if (eventTarget === $resultsNav) {
-        findMatches();
+        renderI = 'search';
+        searchYouTube();
         viewResults();
+        $form?.reset();
     }
     if (eventTarget === $xIcon) {
         $dialog.close();
@@ -134,43 +138,34 @@ $body.addEventListener('click', (event) => {
             }
         }
     }
-    const $solidHearts = document.querySelectorAll('.solid-heart');
-    const $outlineHearts = document.querySelectorAll('.outline-heart');
-    if (!$solidHearts || !$outlineHearts)
-        throw new Error('$hearts query failed');
     if (eventTarget.matches('.outline-heart')) {
         const video = data.searchArr.find((video) => video.id === eventTarget.dataset.id);
-        if (data.favoritesArr.indexOf(video) < 0) {
-            data.favoritesArr.push(video);
-            writeJSON();
-        }
-        for (let i = 0; i < $solidHearts.length; i++) {
-            const elementSolidHeart = $solidHearts[i];
-            const elementOutlineHeart = $outlineHearts[i];
-            if (elementSolidHeart.dataset.id === eventTarget.dataset.id) {
-                elementSolidHeart.setAttribute('class', 'fa-solid fa-heart fa-lg float-right pr-2 solid-heart ');
-                elementOutlineHeart.setAttribute('class', 'fa-outline fa-heart fa-lg float-right pr-2 outline-heart hidden md:hidden');
-            }
-        }
+        video.favorite = true;
+        data.favoritesArr.push(video);
+        writeJSON();
+        toggleHeart(eventTarget);
     }
     if (eventTarget.matches('.solid-heart')) {
-        const videoIndex = data.favoritesArr.findIndex((video) => video.id === eventTarget.dataset.id);
-        data.favoritesArr.splice(videoIndex, 1);
+        const videoFromSearch = data.searchArr.find((video) => video.id === eventTarget.dataset.id);
+        const video = data.favoritesArr.find((video) => video.id === eventTarget.dataset.id);
+        toggleHeart(eventTarget);
+        videoFromSearch.favorite = false;
+        data.favoritesArr.splice(data.favoritesArr.indexOf(video), 1);
         writeJSON();
-        for (let i = 0; i < $solidHearts.length; i++) {
-            const elementSolidHeart = $solidHearts[i];
-            const elementOutlineHeart = $outlineHearts[i];
-            if (elementSolidHeart.dataset.id === eventTarget.dataset.id) {
-                elementSolidHeart.setAttribute('class', 'fa-solid fa-heart fa-lg float-right pr-2 solid-heart hidden md:hidden');
-                elementOutlineHeart.setAttribute('class', 'fa-regular fa-heart fa-lg float-right pr-2 outline-heart');
-            }
-        }
     }
     if (eventTarget === $favorites) {
         viewFavorites();
+        renderI = 'favorites';
+        renderVideos(renderI);
     }
     if (eventTarget === $search) {
+        renderI = 'search';
         viewLanding();
+    }
+    if (eventTarget === $resultsNav) {
+        renderI = 'search';
+        renderVideos(renderI);
+        viewResults();
     }
 });
 $dialog.addEventListener('dblclick', (event) => {
@@ -183,9 +178,13 @@ $dialog.addEventListener('dblclick', (event) => {
 });
 document.addEventListener('DOMContentLoaded', () => {
     readJSON();
-    renderFavorites();
-    renderSearch();
-    findMatches();
+    if (data.viewIndex === 2) {
+        renderI = 'search';
+    }
+    else if (data.viewIndex === 3) {
+        renderI = 'favorites';
+    }
+    renderVideos(renderI);
     if (data.viewIndex === 1) {
         viewLanding();
     }
@@ -198,7 +197,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 function viewLanding() {
     $landing?.setAttribute('class', 'container md:pt-14 px-4 md:px-0 pt-8 mx-auto flex flex-wrap md:flex-nowrap max-w-screen-lg');
-    $favoritesDiv?.setAttribute('class', 'favorites-container hidden md:hidden');
     $results?.setAttribute('class', 'container hidden md:hidden');
     data.viewIndex = 1;
     writeJSON();
@@ -206,19 +204,13 @@ function viewLanding() {
 function viewResults() {
     $results?.setAttribute('class', 'results-container');
     $landing?.setAttribute('class', 'hidden md:hidden container md:pt-14 px-4 md:px-0 pt-8 mx-auto flex flex-wrap md:flex-nowrap max-w-screen-lg');
-    $favoritesDiv?.setAttribute('class', 'favorites-container hidden md:hidden');
+    $pNoFavorites?.setAttribute('class', 'hidden md:hidden text-lg text-center w-full mt-10');
     data.viewIndex = 2;
     writeJSON();
 }
 function viewFavorites() {
-    $results?.setAttribute('class', 'results-container hidden md:hidden');
+    $results?.setAttribute('class', 'results-container');
     $landing?.setAttribute('class', 'hidden md:hidden container md:pt-14 px-4 md:px-0 pt-8 mx-auto flex flex-wrap md:flex-nowrap max-w-screen-lg');
-    $favoritesDiv?.setAttribute('class', 'favorites-container');
-    const $favContainer = document.querySelector('.favContainer');
-    if ($favContainer) {
-        $favContainer.remove();
-        renderFavorites();
-    }
     if (data.favoritesArr[0]) {
         $pNoFavorites?.setAttribute('class', 'hidden md:hidden text-lg text-center w-full mt-10');
     }
@@ -228,97 +220,48 @@ function viewFavorites() {
     data.viewIndex = 3;
     writeJSON();
 }
-function findMatches() {
-    const matches = [];
-    for (let i = 0; i < data.searchArr.length; i++) {
-        const vidId = data.searchArr[i].id;
-        for (let i = 0; i < data.favoritesArr.length; i++) {
-            if (vidId === data.favoritesArr[i].id) {
-                matches.push(data.favoritesArr[i]);
-            }
-        }
-    }
+function toggleHeart(eventTarget) {
     const $solidHearts = document.querySelectorAll('.solid-heart');
     const $outlineHearts = document.querySelectorAll('.outline-heart');
-    for (let i = 0; i < matches.length; i++) {
-        const matchesId = matches[i].id;
+    if (!$solidHearts || !$outlineHearts)
+        throw new Error('$hearts query failed');
+    if (eventTarget.matches('.solid-heart')) {
         for (let i = 0; i < $solidHearts.length; i++) {
             const elementSolidHeart = $solidHearts[i];
             const elementOutlineHeart = $outlineHearts[i];
-            if (elementSolidHeart.dataset.id === matchesId) {
-                elementSolidHeart.setAttribute('class', 'fa-solid fa-heart fa-lg float-right pr-2 solid-heart');
+            if (elementSolidHeart.dataset.id === eventTarget.dataset.id) {
+                elementSolidHeart.setAttribute('class', 'fa-solid fa-heart fa-lg float-right pr-2 solid-heart hidden md:hidden');
+                elementOutlineHeart.setAttribute('class', 'fa-regular fa-heart fa-lg float-right pr-2 outline-heart');
+            }
+        }
+    }
+    if (eventTarget.matches('.outline-heart')) {
+        for (let i = 0; i < $outlineHearts.length; i++) {
+            const elementSolidHeart = $solidHearts[i];
+            const elementOutlineHeart = $outlineHearts[i];
+            if (elementOutlineHeart.dataset.id === eventTarget.dataset.id) {
+                elementSolidHeart.setAttribute('class', 'fa-solid fa-heart fa-lg float-right pr-2 solid-heart ');
                 elementOutlineHeart.setAttribute('class', 'fa-regular fa-heart fa-lg float-right pr-2 outline-heart hidden md:hidden');
             }
         }
     }
 }
-function renderFavorites() {
+function renderVideos(renderI) {
     readJSON();
-    const $favContainer = $favoriteVideos.appendChild(document.createElement('div'));
-    $favContainer.setAttribute('class', 'favContainer mx-auto flex flex-wrap justify-between');
-    for (let i = 0; i < data.favoritesArr.length; i++) {
-        const $videoContainer = $favContainer?.appendChild(document.createElement('div'));
-        if (!$videoContainer)
-            throw new Error('$videoContainer creation error');
-        $videoContainer.setAttribute('class', 'fav-video-div basis-1/3 mb-8');
-        const $videoAnchor = $videoContainer.appendChild(document.createElement('a'));
-        if (!$videoAnchor)
-            throw new Error('$videoAnchor creation error');
-        $videoAnchor.setAttribute('href', '#');
-        $videoAnchor.setAttribute('class', 'video');
-        const $thumbnail = $videoAnchor.appendChild(document.createElement('img'));
-        if (!$thumbnail)
-            throw new Error('$thumbnail creation error');
-        $thumbnail.setAttribute('class', 'h-fit rounded-sm w-80 thumbnail');
-        $thumbnail.setAttribute('src', data.favoritesArr[i]?.thumbnail);
-        $thumbnail.setAttribute('data-id', data.favoritesArr[i]?.id);
-        const $videoText = $videoContainer.appendChild(document.createElement('div'));
-        if (!$videoText)
-            throw new Error('unable to create $videoText');
-        $videoText.setAttribute('class', 'video-text w-80 pl-1 pt-1');
-        const $channelHeartsDiv = $videoText.appendChild(document.createElement('p'));
-        if (!$channelHeartsDiv)
-            throw new Error('unable to create $hearts');
-        $channelHeartsDiv.setAttribute('class', 'flex justify-between items-center');
-        const $channelAnchor = $channelHeartsDiv.appendChild(document.createElement('a'));
-        if (!$channelAnchor)
-            throw new Error('unable to create $channelAnchor');
-        $channelAnchor?.setAttribute('href', `https://www.youtube.com/channel/${data.favoritesArr[i].channelId}`);
-        $channelAnchor.setAttribute('class', 'channelAnchor');
-        $channelAnchor.setAttribute('target', '_blank');
-        const $heartAnchor = $channelHeartsDiv.appendChild(document.createElement('a'));
-        if (!$heartAnchor)
-            throw new Error('$heartAnchor not present');
-        $heartAnchor.setAttribute('href', '#');
-        const $heartSolid = $heartAnchor.appendChild(document.createElement('i'));
-        if (!$heartSolid)
-            throw new Error('$heart not created');
-        $heartSolid.setAttribute('class', 'fa-solid fa-heart fa-lg float-right pr-2  solid-heart');
-        $heartSolid.setAttribute('style', 'color: #403768');
-        $heartSolid.setAttribute('data-id', data.favoritesArr[i]?.id);
-        const $heartOutline = $heartAnchor.appendChild(document.createElement('i'));
-        if (!$heartOutline)
-            throw new Error('$heart not created');
-        $heartOutline.setAttribute('class', 'fa-regular fa-heart fa-lg float-right pr-2 outline-heart hidden md:hidden');
-        $heartOutline.setAttribute('style', 'color: #403768');
-        $heartOutline.setAttribute('data-id', data.favoritesArr[i].id);
-        const $channel = $channelAnchor.appendChild(document.createElement('span'));
-        if (!$channel)
-            throw new Error('unable to create $channel');
-        $channel.setAttribute('class', 'font-medium text-lg underline channel');
-        $channel.innerHTML = data.favoritesArr[i]?.channel;
-        const $title = $videoText.appendChild(document.createElement('p'));
-        if (!$title)
-            throw new Error('unable to create $title');
-        $title.setAttribute('class', 'font-normal text-md pr-4');
-        $title.innerHTML = ' ' + data.favoritesArr[i]?.title;
+    const $videoCont = document.querySelector('.vidContainer');
+    if ($videoCont) {
+        $videoCont.remove();
     }
-}
-function renderSearch() {
-    readJSON();
+    let render = [];
+    if (renderI === 'search') {
+        render = data.searchArr;
+    }
+    else if (renderI === 'favorites') {
+        render = data.favoritesArr;
+    }
     const $vidContainer = $videosDiv.appendChild(document.createElement('div'));
     $vidContainer.setAttribute('class', 'vidContainer mx-auto flex flex-wrap justify-between');
-    for (let i = 0; i < data.searchArr.length; i++) {
+    for (let i = 0; i < render.length; i++) {
         const $videoContainer = $vidContainer.appendChild(document.createElement('div'));
         if (!$videoContainer)
             throw new Error('$videoContainer creation error');
@@ -332,8 +275,8 @@ function renderSearch() {
         if (!$thumbnail)
             throw new Error('$thumbnail creation error');
         $thumbnail.setAttribute('class', 'h-fit rounded-sm w-80 thumbnail');
-        $thumbnail.setAttribute('src', data.searchArr[i].thumbnail);
-        $thumbnail.setAttribute('data-id', data.searchArr[i].id);
+        $thumbnail.setAttribute('src', render[i].thumbnail);
+        $thumbnail.setAttribute('data-id', render[i].id);
         const $videoText = $videoContainer.appendChild(document.createElement('div'));
         if (!$videoText)
             throw new Error('unable to create $videoText');
@@ -345,7 +288,7 @@ function renderSearch() {
         const $channelAnchor = $channelHeartsDiv.appendChild(document.createElement('a'));
         if (!$channelAnchor)
             throw new Error('unable to create $channelAnchor');
-        $channelAnchor?.setAttribute('href', `https://www.youtube.com/channel/${data.searchArr[i].channelId}`);
+        $channelAnchor?.setAttribute('href', `https://www.youtube.com/channel/${render[i].channelId}`);
         $channelAnchor.setAttribute('class', 'channelAnchor');
         $channelAnchor.setAttribute('target', '_blank');
         const $heartAnchor = $channelHeartsDiv.appendChild(document.createElement('a'));
@@ -353,27 +296,31 @@ function renderSearch() {
             throw new Error('$heartAnchor not present');
         $heartAnchor.setAttribute('href', '#');
         const $heartSolid = $heartAnchor.appendChild(document.createElement('i'));
-        if (!$heartSolid)
-            throw new Error('$heart not created');
-        $heartSolid.setAttribute('class', 'fa-solid fa-heart fa-lg float-right pr-2 hidden md:hidden solid-heart');
-        $heartSolid.setAttribute('style', 'color: #403768');
-        $heartSolid.setAttribute('data-id', data.searchArr[i].id);
         const $heartOutline = $heartAnchor.appendChild(document.createElement('i'));
-        if (!$heartOutline)
+        if (!$heartSolid || !$heartOutline)
             throw new Error('$heart not created');
-        $heartOutline.setAttribute('class', 'fa-regular fa-heart fa-lg float-right pr-2 outline-heart');
+        if (render[i].favorite) {
+            $heartSolid.setAttribute('class', 'fa-solid fa-heart fa-lg float-right pr-2 solid-heart');
+            $heartOutline.setAttribute('class', 'fa-regular fa-heart fa-lg float-right pr-2 md:hidden hidden outline-heart');
+        }
+        else if (!render[i].favorite) {
+            $heartSolid.setAttribute('class', 'fa-solid fa-heart fa-lg float-right pr-2 solid-heart md:hidden hidden');
+            $heartOutline.setAttribute('class', 'fa-regular fa-heart fa-lg float-right pr-2 outline-heart');
+        }
+        $heartSolid.setAttribute('style', 'color: #403768');
+        $heartSolid.setAttribute('data-id', render[i].id);
         $heartOutline.setAttribute('style', 'color: #403768');
-        $heartOutline.setAttribute('data-id', data.searchArr[i].id);
+        $heartOutline.setAttribute('data-id', render[i].id);
         const $channel = $channelAnchor.appendChild(document.createElement('span'));
         if (!$channel)
             throw new Error('unable to create $channel');
         $channel.setAttribute('class', 'font-medium text-lg underline channel');
-        $channel.innerHTML = data.searchArr[i].channel;
+        $channel.innerHTML = render[i].channel;
         const $title = $videoText.appendChild(document.createElement('p'));
         if (!$title)
             throw new Error('unable to create $title');
         $title.setAttribute('class', 'font-normal text-md pr-4');
-        $title.innerHTML = ' ' + data.searchArr[i].title;
+        $title.innerHTML = ' ' + render[i].title;
     }
     return $videosDiv;
 }
