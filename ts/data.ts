@@ -31,7 +31,6 @@ let data: Data = {
 };
 
 function writeJSON(): void {
-  console.log('writeJSON called');
   const dataJSON = JSON.stringify(data);
   localStorage.setItem('data', dataJSON);
 }

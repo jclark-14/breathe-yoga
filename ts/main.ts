@@ -1,4 +1,4 @@
-const API_KEY = 'AIzaSyC1ooFAsCCpsb6kgDMct1kXJTtn0vp5AKc';
+const API_KEY = 'AIzaSyDFMMKvQu9eI1apQkQDi__onjn2vhhV-hU';
 const $submitSearch = document.querySelector('#submit');
 const $landing = document.querySelector('#landing');
 const $formInputs = document.querySelectorAll('select');
@@ -12,14 +12,11 @@ const $form = document.querySelector('form');
 const $search = document.querySelector('#search');
 const $favorites = document.querySelector('#favorites');
 const $resultsNav = document.querySelector('#results');
-// const $favoritesDiv = document.querySelector('#favorites-div');
-// const $favoriteVideos = document.querySelector(
-//   '#favorite-videos',
-// ) as HTMLDivElement;
 const $xIcon = document.querySelector('.iconX');
 const $results = document.querySelector('#results-container');
 const $videosDiv = document.querySelector('.videos-div') as HTMLDivElement;
 const $pNoFavorites = document.querySelector('.pfav');
+const $subHeading = document.getElementById('subheading');
 
 if (
   !$submitSearch ||
@@ -36,11 +33,10 @@ if (
   !$search ||
   !$results ||
   !$favorites ||
-  // !$favoritesDiv ||
   !$videosDiv ||
-  // !$favoriteVideos ||
   !$pNoFavorites ||
-  !$resultsNav
+  !$resultsNav ||
+  !$subHeading
 )
   throw new Error('HTML query failed');
 
@@ -96,16 +92,22 @@ async function searchYouTube(): Promise<void> {
         channelId,
         favorite,
       };
-      if (data.favoritesArr.indexOf(video) < 0) {
-        video.favorite = false;
-      } else {
-        video.favorite = true;
-      }
       data.searchArr.push(video);
     });
+    for (let i = 0; i < data.searchArr.length; i++) {
+      const videoId = data.searchArr[i].id;
+      const matched = data.favoritesArr.find(
+        (element) => element.id === videoId,
+      );
+      if (matched) {
+        data.searchArr[i].favorite = true;
+      } else if (!matched) {
+        data.searchArr[i].favorite = false;
+      }
+    }
     writeJSON();
-    renderI = 'search';
     renderVideos(renderI);
+    viewResults();
   } catch (error) {
     console.error('Error:', error);
   }
@@ -119,7 +121,6 @@ $body.addEventListener('click', (event: Event): void => {
     event.preventDefault();
     renderI = 'search';
     searchYouTube();
-    viewResults();
     $form?.reset();
   }
 
@@ -199,7 +200,6 @@ document.addEventListener('DOMContentLoaded', () => {
     renderI = 'favorites';
   }
   renderVideos(renderI);
-
   if (data.viewIndex === 1) {
     viewLanding();
   } else if (data.viewIndex === 2) {
@@ -225,10 +225,17 @@ function viewResults(): void {
     'class',
     'hidden md:hidden container md:pt-14 px-4 md:px-0 pt-8 mx-auto flex flex-wrap md:flex-nowrap max-w-screen-lg',
   );
-  $pNoFavorites?.setAttribute(
-    'class',
-    'hidden md:hidden text-lg text-center w-full mt-10',
-  );
+  if (data.searchArr[0]) {
+    $pNoFavorites?.setAttribute(
+      'class',
+      'hidden md:hidden text-lg text-center w-full mt-10',
+    );
+  } else if (!data.searchArr[0]) {
+    $pNoFavorites?.setAttribute('class', 'text-lg text-center w-full mt-10');
+  }
+  if ($pNoFavorites) $pNoFavorites.innerHTML = 'No results found.';
+  if ($subHeading) $subHeading.textContent = 'Results';
+
   data.viewIndex = 2;
   writeJSON();
 }
@@ -247,6 +254,7 @@ function viewFavorites(): void {
   } else if (!data.favoritesArr[0]) {
     $pNoFavorites?.setAttribute('class', ' text-lg text-center w-full mt-10');
   }
+  if ($subHeading) $subHeading.textContent = 'Favorites';
   data.viewIndex = 3;
   writeJSON();
 }

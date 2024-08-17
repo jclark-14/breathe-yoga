@@ -8,22 +8,23 @@ header {
   box-shadow: 0 4px 6px rgb(95, 95, 95);
 }
 
-h1 {
+/* h1 {
   text-shadow: 2px 2px 4px rgb(30, 30, 30);
-}
+} */
 
-h2 {
-  text-shadow: 1px 1px 1px rgba(62, 62, 62, 0.293);
-}
+/* h2 {
+  text-shadow: 1px 1px 1px rgb(255, 255, 255);
+} */
 
+/*
 h3 {
   text-shadow: 1px 1px 1px rgba(62, 62, 62, 0.293);
-}
+} */
 
-#search,
+/* #search,
 #favorites {
   text-shadow: 3px 3px rgb(44, 44, 44);
-}
+} */
 
 img {
   box-shadow: 3px 3px 6px rgb(126, 126, 126);
