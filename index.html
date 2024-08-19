@@ -120,19 +120,25 @@
             No videos saved to favorites.
           </p>
           <div
-            class="videos-div px-4 pt-4 md:px-0 md:pt-0 flex flex-wrap mx-auto"></div>
+            class="videos-div px-4 pt-4 md:px-0 md:pt-0 flex flex-wrap mx-auto w-full"></div>
         </div>
       </div>
     </main>
-    <dialog class="modal rounded-md p-0 relative bottom-10">
-      <div>
+    <dialog class="modal rounded-md p-0 bottom-10 w-screen h-screen mx-auto">
+      <div class="flex justify-center items-center h-full w-full relative">
+        <a href="#" class="modal-heart"
+          ><i
+            id="modal-outline-heart"
+            class="fa-regular fa-heart fa-xl modal-heart-outline heart absolute left-2 top-10"
+            style="color: rgba(224, 224, 224, 0.738)"></i
+        ></a>
         <a href="#" class="aX"
           ><i
             style="color: rgba(224, 224, 224, 0.738)"
-            class="absolute iconX fa-solid fa-x fa-lg right-2 top-4"></i>
+            class="absolute iconX fa-solid fa-x fa-xl right-2 top-10"></i>
         </a>
         <iframe
-          class="hidden md:flex lg-screen"
+          class="hidden md:flex lg-screen rounded-md"
           loading="lazy"
           title="yoga video"
           width="1080"
@@ -141,7 +147,7 @@
           src="https://www.youtube.com/embed/v7SN-d4qXx0">
         </iframe>
         <iframe
-          class="md:hidden mobile"
+          class="md:hidden mobile rounded-md"
           loading="lazy"
           title="yoga video"
           width="400"
