@@ -13,21 +13,33 @@ interface Video {
   thumbnail: string;
   channel: string;
   channelId: string;
+  favorite: boolean;
 }
 
-let favoritesArr: Video[] = [];
+interface Data {
+  favoritesArr: Video[];
+  searchArr: Video[];
+  viewIndex?: number;
+}
+
+const favoritesArr: Video[] = [];
+const searchArr: Video[] = [];
+
+let data: Data = {
+  searchArr,
+  favoritesArr,
+};
 
 function writeJSON(): void {
-  const videoJSONs = JSON.stringify(favoritesArr);
-  localStorage.setItem('video-storage', videoJSONs);
+  const dataJSON = JSON.stringify(data);
+  localStorage.setItem('data', dataJSON);
 }
 
-function readJSON(): Video[] {
-  const returnJSON = localStorage.getItem('video-storage') as string;
-  if (returnJSON) {
-    favoritesArr = JSON.parse(returnJSON);
-    return favoritesArr;
+function readJSON(): Data {
+  const readData = localStorage.getItem('data');
+  if (readData) {
+    data = JSON.parse(readData);
+    return data;
   }
-  favoritesArr = [];
-  return favoritesArr;
+  return data;
 }

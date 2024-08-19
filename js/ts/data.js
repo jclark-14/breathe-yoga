@@ -1,15 +1,19 @@
 "use strict";
-let favoritesArr = [];
+const favoritesArr = [];
+const searchArr = [];
+let data = {
+    searchArr,
+    favoritesArr,
+};
 function writeJSON() {
-    const videoJSONs = JSON.stringify(favoritesArr);
-    localStorage.setItem('video-storage', videoJSONs);
+    const dataJSON = JSON.stringify(data);
+    localStorage.setItem('data', dataJSON);
 }
 function readJSON() {
-    const returnJSON = localStorage.getItem('video-storage');
-    if (returnJSON) {
-        favoritesArr = JSON.parse(returnJSON);
-        return favoritesArr;
+    const readData = localStorage.getItem('data');
+    if (readData) {
+        data = JSON.parse(readData);
+        return data;
     }
-    favoritesArr = [];
-    return favoritesArr;
+    return data;
 }
