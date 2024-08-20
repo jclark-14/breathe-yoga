@@ -119,7 +119,6 @@ async function searchYouTube(): Promise<void> {
 $body.addEventListener('click', (event: Event): void => {
   const $thumbnail = document.querySelectorAll('.thumbnail');
   const eventTarget = event.target as HTMLElement;
-  console.log(eventTarget);
   readJSON();
   if (eventTarget === $submitSearch) {
     event.preventDefault();
