@@ -19,7 +19,6 @@ const $videosDiv = document.querySelector('.videos-div');
 const $pNoFavorites = document.querySelector('.pfav');
 const $subHeading = document.getElementById('subheading');
 const $modalHeart = document.getElementById('modal-outline-heart');
-// const $modalHeartSolid = document.getElementById('modal-solid-heart');
 if (!$submitSearch ||
     !$iFrameLg ||
     !$iFrameMobile ||
@@ -38,9 +37,7 @@ if (!$submitSearch ||
     !$pNoFavorites ||
     !$resultsNav ||
     !$subHeading ||
-    !$modalHeart
-// !$modalHeartSolid
-)
+    !$modalHeart)
     throw new Error('HTML query failed');
 let url;
 let render;
@@ -120,10 +117,12 @@ async function searchYouTube() {
 $body.addEventListener('click', (event) => {
     const $thumbnail = document.querySelectorAll('.thumbnail');
     const eventTarget = event.target;
+    console.log(eventTarget);
     readJSON();
     if (eventTarget === $submitSearch) {
         event.preventDefault();
         render = 'search';
+        viewIndex = 2;
         searchYouTube();
         $form?.reset();
     }
@@ -136,10 +135,7 @@ $body.addEventListener('click', (event) => {
                 const formattedStr = `https://www.youtube.com/embed/${videoId}`;
                 $iFrameLg.setAttribute('src', formattedStr);
                 $iFrameMobile.setAttribute('src', formattedStr);
-                let video = data.favoritesArr.find((element) => element.id === eventTarget.dataset.id);
-                if (!video) {
-                    video = data.searchArr.find((element) => element.id === eventTarget.dataset.id);
-                }
+                const video = findVideoById(videoId);
                 if (video?.favorite) {
                     $modalHeart.setAttribute('class', 'fa-solid fa-heart fa-xl modal-heart-outline heart absolute left-2 top-10');
                 }
@@ -152,6 +148,8 @@ $body.addEventListener('click', (event) => {
     if (eventTarget.matches('.heart')) {
         toggleFavorite(eventTarget);
         toggleHeart(eventTarget);
+        renderVideos(render);
+        viewSwap(viewIndex);
     }
     if (eventTarget === $favorites) {
         viewIndex = 3;
@@ -189,13 +187,6 @@ document.addEventListener('DOMContentLoaded', () => {
         viewIndex = 3;
     }
     renderVideos(render);
-    // if (data.viewIndex === 1) {
-    //   viewLanding();
-    // } else if (data.viewIndex === 2) {
-    //   viewResults();
-    // } else if (data.viewIndex === 3) {
-    //   viewFavorites();
-    // }
 });
 function viewSwap(viewIndex) {
     if (viewIndex === 1) {
@@ -233,64 +224,10 @@ function viewSwap(viewIndex) {
         data.viewIndex = 3;
     }
 }
-// function viewLanding(): void {
-//   $landing?.setAttribute(
-//     'class',
-//     'container md:pt-14 px-4 md:px-0 pt-8 mx-auto flex flex-wrap md:flex-nowrap max-w-screen-lg',
-//   );
-//   $results?.setAttribute('class', 'container hidden md:hidden');
-//   data.viewIndex = 1;
-//   writeJSON();
-// }
-// function viewResults(): void {
-//   $results?.setAttribute('class', 'results-container');
-//   $landing?.setAttribute(
-//     'class',
-//     'hidden md:hidden container md:pt-14 px-4 md:px-0 pt-8 mx-auto flex flex-wrap md:flex-nowrap max-w-screen-lg',
-//   );
-//   if (data.searchArr[0]) {
-//     $pNoFavorites?.setAttribute(
-//       'class',
-//       'hidden md:hidden text-lg text-center w-full mt-10',
-//     );
-//   } else if (!data.searchArr[0]) {
-//     $pNoFavorites?.setAttribute('class', 'text-lg text-center w-full mt-10');
-//   }
-//   if ($pNoFavorites) $pNoFavorites.innerHTML = 'No results found.';
-//   if ($subHeading) $subHeading.textContent = 'Results';
-//   data.viewIndex = 2;
-//   writeJSON();
-// }
-// function viewFavorites(): void {
-//   $results?.setAttribute('class', 'results-container');
-//   $landing?.setAttribute(
-//     'class',
-//     'hidden md:hidden container md:pt-14 px-4 md:px-0 pt-8 mx-auto flex flex-wrap md:flex-nowrap max-w-screen-lg',
-//   );
-//   if (data.favoritesArr[0]) {
-//     $pNoFavorites?.setAttribute(
-//       'class',
-//       'hidden md:hidden text-lg text-center w-full mt-10',
-//     );
-//   } else if (!data.favoritesArr[0] && $pNoFavorites) {
-//     $pNoFavorites.setAttribute('class', ' text-lg text-center w-full mt-10');
-//     $pNoFavorites.textContent = 'No videos saved to favorites.';
-//   }
-//   if ($subHeading) $subHeading.textContent = 'Favorites';
-//   data.viewIndex = 3;
-//   writeJSON();
-// }
 function toggleFavorite(eventTarget) {
     readJSON();
     if (eventTarget.matches('.heart')) {
         const video = findVideoById(eventTarget.dataset.id);
-        // let video = data.searchArr.find(
-        //   (video) => video.id === eventTarget.dataset.id,
-        // ) as Video;
-        // if (!video)
-        //   video = data.favoritesArr.find(
-        //     (video) => video.id === eventTarget.dataset.id,
-        //   ) as Video;
         if (video)
             if (video.favorite === true) {
                 video.favorite = false;

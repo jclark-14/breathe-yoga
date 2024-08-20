@@ -119,10 +119,12 @@ async function searchYouTube(): Promise<void> {
 $body.addEventListener('click', (event: Event): void => {
   const $thumbnail = document.querySelectorAll('.thumbnail');
   const eventTarget = event.target as HTMLElement;
+  console.log(eventTarget);
   readJSON();
   if (eventTarget === $submitSearch) {
     event.preventDefault();
     render = 'search';
+    viewIndex = 2;
     searchYouTube();
     $form?.reset();
   }
@@ -136,14 +138,7 @@ $body.addEventListener('click', (event: Event): void => {
         const formattedStr = `https://www.youtube.com/embed/${videoId}`;
         $iFrameLg.setAttribute('src', formattedStr);
         $iFrameMobile.setAttribute('src', formattedStr);
-        let video = data.favoritesArr.find(
-          (element) => element.id === eventTarget.dataset.id,
-        );
-        if (!video) {
-          video = data.searchArr.find(
-            (element) => element.id === eventTarget.dataset.id,
-          );
-        }
+        const video = findVideoById(videoId);
         if (video?.favorite) {
           $modalHeart.setAttribute(
             'class',
@@ -162,6 +157,8 @@ $body.addEventListener('click', (event: Event): void => {
   if (eventTarget.matches('.heart')) {
     toggleFavorite(eventTarget);
     toggleHeart(eventTarget);
+    renderVideos(render);
+    viewSwap(viewIndex);
   }
 
   if (eventTarget === $favorites) {
