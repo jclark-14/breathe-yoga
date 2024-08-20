@@ -18,7 +18,6 @@ const $videosDiv = document.querySelector('.videos-div') as HTMLDivElement;
 const $pNoFavorites = document.querySelector('.pfav');
 const $subHeading = document.getElementById('subheading');
 const $modalHeart = document.getElementById('modal-outline-heart');
-// const $modalHeartSolid = document.getElementById('modal-solid-heart');
 
 if (
   !$submitSearch ||
@@ -40,13 +39,13 @@ if (
   !$resultsNav ||
   !$subHeading ||
   !$modalHeart
-  // !$modalHeartSolid
 )
   throw new Error('HTML query failed');
 
 let url: string;
 let render: string;
 const favorite = true || false;
+let viewIndex = 1;
 
 function createUrl(): void {
   const inputs: SearchInputs = {
@@ -111,7 +110,7 @@ async function searchYouTube(): Promise<void> {
     }
     writeJSON();
     renderVideos(render);
-    viewResults();
+    viewSwap(viewIndex);
   } catch (error) {
     console.error('Error:', error);
   }
@@ -126,12 +125,6 @@ $body.addEventListener('click', (event: Event): void => {
     render = 'search';
     searchYouTube();
     $form?.reset();
-  }
-
-  if (eventTarget === $xIcon) {
-    $dialog.close();
-    $iFrameLg.setAttribute('src', '');
-    $iFrameMobile.setAttribute('src', '');
   }
 
   if ($thumbnail) {
@@ -172,29 +165,31 @@ $body.addEventListener('click', (event: Event): void => {
   }
 
   if (eventTarget === $favorites) {
-    viewFavorites();
+    viewIndex = 3;
+    viewSwap(viewIndex);
     render = 'favorites';
     renderVideos(render);
   }
 
   if (eventTarget === $search) {
+    viewIndex = 1;
+    viewSwap(viewIndex);
     render = 'search';
-    viewLanding();
   }
 
   if (eventTarget === $resultsNav) {
+    viewIndex = 2;
+    viewSwap(viewIndex);
     render = 'search';
     renderVideos(render);
-    viewResults();
   }
-});
 
-$dialog.addEventListener('dblclick', (event: Event): void => {
-  const eventTarget = event.target as HTMLElement;
-  if (eventTarget === $dialog) {
+  if (eventTarget === $xIcon) {
     $dialog.close();
     $iFrameLg.setAttribute('src', '');
     $iFrameMobile.setAttribute('src', '');
+    renderVideos(render);
+    viewSwap(viewIndex);
   }
 });
 
@@ -202,119 +197,103 @@ document.addEventListener('DOMContentLoaded', () => {
   readJSON();
   if (data.viewIndex === 2) {
     render = 'search';
+    viewIndex = 2;
   } else if (data.viewIndex === 3) {
     render = 'favorites';
+    viewIndex = 3;
   }
   renderVideos(render);
-  if (data.viewIndex === 1) {
-    viewLanding();
-  } else if (data.viewIndex === 2) {
-    viewResults();
-  } else if (data.viewIndex === 3) {
-    viewFavorites();
-  }
 });
 
-function viewLanding(): void {
-  $landing?.setAttribute(
-    'class',
-    'container md:pt-14 px-4 md:px-0 pt-8 mx-auto flex flex-wrap md:flex-nowrap max-w-screen-lg',
-  );
-  $results?.setAttribute('class', 'container hidden md:hidden');
-  data.viewIndex = 1;
-  writeJSON();
-}
-
-function viewResults(): void {
-  $results?.setAttribute('class', 'results-container');
-  $landing?.setAttribute(
-    'class',
-    'hidden md:hidden container md:pt-14 px-4 md:px-0 pt-8 mx-auto flex flex-wrap md:flex-nowrap max-w-screen-lg',
-  );
-  if (data.searchArr[0]) {
-    $pNoFavorites?.setAttribute(
+function viewSwap(viewIndex: number): void {
+  if (viewIndex === 1) {
+    $landing?.setAttribute(
       'class',
-      'hidden md:hidden text-lg text-center w-full mt-10',
+      'container md:pt-14 px-4 md:px-0 pt-8 mx-auto flex flex-wrap md:flex-nowrap max-w-screen-lg',
     );
-  } else if (!data.searchArr[0]) {
-    $pNoFavorites?.setAttribute('class', 'text-lg text-center w-full mt-10');
-  }
-  if ($pNoFavorites) $pNoFavorites.innerHTML = 'No results found.';
-  if ($subHeading) $subHeading.textContent = 'Results';
-  data.viewIndex = 2;
-  writeJSON();
-}
-
-function viewFavorites(): void {
-  $results?.setAttribute('class', 'results-container');
-  $landing?.setAttribute(
-    'class',
-    'hidden md:hidden container md:pt-14 px-4 md:px-0 pt-8 mx-auto flex flex-wrap md:flex-nowrap max-w-screen-lg',
-  );
-  if (data.favoritesArr[0]) {
-    $pNoFavorites?.setAttribute(
+    $results?.setAttribute('class', 'container hidden md:hidden');
+    data.viewIndex = 1;
+  } else if (viewIndex === 2) {
+    $results?.setAttribute('class', 'results-container');
+    $landing?.setAttribute(
       'class',
-      'hidden md:hidden text-lg text-center w-full mt-10',
+      'hidden md:hidden container md:pt-14 px-4 md:px-0 pt-8 mx-auto flex flex-wrap md:flex-nowrap max-w-screen-lg',
     );
-  } else if (!data.favoritesArr[0] && $pNoFavorites) {
-    $pNoFavorites.setAttribute('class', ' text-lg text-center w-full mt-10');
-    $pNoFavorites.textContent = 'No videos saved to favorites.';
+    if (data.searchArr[0]) {
+      $pNoFavorites?.setAttribute(
+        'class',
+        'hidden md:hidden text-lg text-center w-full mt-10',
+      );
+    } else if (!data.searchArr[0]) {
+      $pNoFavorites?.setAttribute('class', 'text-lg text-center w-full mt-10');
+    }
+    if ($pNoFavorites && $subHeading) {
+      $pNoFavorites.innerHTML = 'No results found.';
+      $subHeading.textContent = 'Results';
+    }
+    data.viewIndex = 2;
+  } else if (viewIndex === 3) {
+    $results?.setAttribute('class', 'results-container');
+    $landing?.setAttribute(
+      'class',
+      'hidden md:hidden container md:pt-14 px-4 md:px-0 pt-8 mx-auto flex flex-wrap md:flex-nowrap max-w-screen-lg',
+    );
+    if (data.favoritesArr[0]) {
+      $pNoFavorites?.setAttribute(
+        'class',
+        'hidden md:hidden text-lg text-center w-full mt-10',
+      );
+    } else if (!data.favoritesArr[0] && $pNoFavorites) {
+      $pNoFavorites.setAttribute('class', ' text-lg text-center w-full mt-10');
+      $pNoFavorites.textContent = 'No videos saved to favorites.';
+    }
+    if ($subHeading) $subHeading.textContent = 'Favorites';
+    data.viewIndex = 3;
   }
-  if ($subHeading) $subHeading.textContent = 'Favorites';
-  data.viewIndex = 3;
-  writeJSON();
 }
 
 function toggleFavorite(eventTarget: HTMLElement): void {
   readJSON();
   if (eventTarget.matches('.heart')) {
-    let video = data.searchArr.find(
-      (video) => video.id === eventTarget.dataset.id,
-    ) as Video;
-    if (!video)
-      video = data.favoritesArr.find(
-        (video) => video.id === eventTarget.dataset.id,
-      ) as Video;
-    if (video.favorite === true) {
-      video.favorite = false;
-      data.favoritesArr.splice(data.favoritesArr.indexOf(video), 1);
-    } else if (video.favorite === false) {
-      video.favorite = true;
-      data.favoritesArr.push(video);
-    }
+    const video = findVideoById(eventTarget.dataset.id);
+    if (video)
+      if (video.favorite === true) {
+        video.favorite = false;
+        data.favoritesArr.splice(data.favoritesArr.indexOf(video), 1);
+      } else if (video.favorite === false) {
+        video.favorite = true;
+        data.favoritesArr.push(video);
+      }
   }
   writeJSON();
 }
 
 function toggleHeart(eventTarget: HTMLElement): void {
-  let video = data.searchArr.find(
-    (element) => element.id === eventTarget.dataset.id,
-  );
-  if (!video) {
-    video = data.favoritesArr.find(
-      (element) => element.id === eventTarget.dataset.id,
+  const video = findVideoById(eventTarget.dataset.id);
+  if (video) {
+    eventTarget.setAttribute(
+      'class',
+      setHeartClass(video.favorite, eventTarget),
     );
   }
-  if (eventTarget === $modalHeart && video?.favorite === false) {
-    $modalHeart.setAttribute(
-      'class',
-      'fa-regular fa-heart fa-xl modal-heart-outline heart absolute left-2 top-10',
-    );
-  } else if (eventTarget === $modalHeart && video?.favorite === true) {
-    $modalHeart.setAttribute(
-      'class',
-      'fa-solid fa-heart fa-xl modal-heart-outline heart absolute left-2 top-10',
-    );
-  } else if (video?.favorite === false) {
-    eventTarget.setAttribute(
-      'class',
-      'fa-regular fa-heart fa-lg float-right heart pr-2 outline-heart',
-    );
-  } else if (video?.favorite === true) {
-    eventTarget.setAttribute(
-      'class',
-      'fa-solid fa-heart fa-lg float-right pr-2 heart solid-heart',
-    );
+}
+
+function findVideoById(id: string | undefined): Video | undefined {
+  return (
+    data.searchArr.find((video) => video.id === id) ||
+    data.favoritesArr.find((video) => video.id === id)
+  );
+}
+
+function setHeartClass(isFavorite: boolean, eventTarget: HTMLElement): string {
+  if (eventTarget === $modalHeart) {
+    return isFavorite
+      ? 'fa-solid fa-heart fa-xl modal-heart-outline heart absolute left-2 top-10'
+      : 'fa-regular fa-heart fa-xl modal-heart-outline heart absolute left-2 top-10';
+  } else {
+    return isFavorite
+      ? 'fa-solid fa-heart fa-lg float-right pr-2 heart solid-heart'
+      : 'fa-regular fa-heart fa-lg float-right heart pr-2 outline-heart';
   }
 }
 
