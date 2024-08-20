@@ -138,6 +138,7 @@ $body.addEventListener('click', (event: Event): void => {
         $iFrameLg.setAttribute('src', formattedStr);
         $iFrameMobile.setAttribute('src', formattedStr);
         const video = findVideoById(videoId);
+        console.log(video);
         if (video?.favorite) {
           $modalHeart.setAttribute(
             'class',
@@ -254,8 +255,11 @@ function toggleFavorite(eventTarget: HTMLElement): void {
     const video = findVideoById(eventTarget.dataset.id);
     if (video)
       if (video.favorite === true) {
+        const index = data.favoritesArr.findIndex(
+          (element) => element.id === video.id,
+        );
+        data.favoritesArr.splice(index, 1);
         video.favorite = false;
-        data.favoritesArr.splice(data.favoritesArr.indexOf(video), 1);
       } else if (video.favorite === false) {
         video.favorite = true;
         data.favoritesArr.push(video);
