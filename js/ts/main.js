@@ -117,7 +117,6 @@ async function searchYouTube() {
 $body.addEventListener('click', (event) => {
     const $thumbnail = document.querySelectorAll('.thumbnail');
     const eventTarget = event.target;
-    console.log(eventTarget);
     readJSON();
     if (eventTarget === $submitSearch) {
         event.preventDefault();
@@ -136,6 +135,7 @@ $body.addEventListener('click', (event) => {
                 $iFrameLg.setAttribute('src', formattedStr);
                 $iFrameMobile.setAttribute('src', formattedStr);
                 const video = findVideoById(videoId);
+                console.log(video);
                 if (video?.favorite) {
                     $modalHeart.setAttribute('class', 'fa-solid fa-heart fa-xl modal-heart-outline heart absolute left-2 top-10');
                 }
@@ -230,8 +230,9 @@ function toggleFavorite(eventTarget) {
         const video = findVideoById(eventTarget.dataset.id);
         if (video)
             if (video.favorite === true) {
+                const index = data.favoritesArr.findIndex((element) => element.id === video.id);
+                data.favoritesArr.splice(index, 1);
                 video.favorite = false;
-                data.favoritesArr.splice(data.favoritesArr.indexOf(video), 1);
             }
             else if (video.favorite === false) {
                 video.favorite = true;
