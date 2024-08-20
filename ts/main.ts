@@ -138,7 +138,6 @@ $body.addEventListener('click', (event: Event): void => {
         $iFrameLg.setAttribute('src', formattedStr);
         $iFrameMobile.setAttribute('src', formattedStr);
         const video = findVideoById(videoId);
-        console.log(video);
         if (video?.favorite) {
           $modalHeart.setAttribute(
             'class',
