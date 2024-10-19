@@ -28,7 +28,7 @@ jclark-14.github.io/breathe-yoga/
 
 ## Preview
 
-[Add a screenshot or GIF of your app here]
+![Breathe Yoga Preview](assets/gif7.gif)
 
 ## Stretch Features
 
