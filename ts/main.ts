@@ -1,4 +1,3 @@
-const API_KEY = 'AIzaSyDFMMKvQu9eI1apQkQDi__onjn2vhhV-hU';
 const $submitSearch = document.querySelector('#submit');
 const $landing = document.querySelector('#landing');
 const $formInputs = document.querySelectorAll('select');
@@ -18,6 +17,8 @@ const $videosDiv = document.querySelector('.videos-div') as HTMLDivElement;
 const $pNoFavorites = document.querySelector('.pfav');
 const $subHeading = document.getElementById('subheading');
 const $modalHeart = document.getElementById('modal-outline-heart');
+
+const API_KEY = process.env.API_KEY;
 
 if (
   !$submitSearch ||
@@ -64,9 +65,7 @@ function createUrl(): void {
   if (inputs.category) keywords.push(inputs.category);
   if (inputs.length) keywords.push(inputs.length);
   if (inputs.focus) keywords.push(inputs.focus);
-  const query = keywords
-    .map((keyword) => encodeURIComponent(keyword))
-    .join('+');
+  const query = keywords.map(keyword => encodeURIComponent(keyword)).join('+');
   url = `https://www.googleapis.com/youtube/v3/search?part=snippet&videoEmbeddable=true&type=video&q=${query}&maxResults=6&key=${API_KEY}`;
 }
 
@@ -99,9 +98,7 @@ async function searchYouTube(): Promise<void> {
     });
     for (let i = 0; i < data.searchArr.length; i++) {
       const videoId = data.searchArr[i].id;
-      const matched = data.favoritesArr.find(
-        (element) => element.id === videoId,
-      );
+      const matched = data.favoritesArr.find(element => element.id === videoId);
       if (matched) {
         data.searchArr[i].favorite = true;
       } else if (!matched) {
@@ -141,12 +138,12 @@ $body.addEventListener('click', (event: Event): void => {
         if (video?.favorite) {
           $modalHeart.setAttribute(
             'class',
-            'fa-solid fa-heart fa-xl modal-heart-outline heart absolute left-2 top-10',
+            'fa-solid fa-heart fa-xl modal-heart-outline heart absolute left-2 top-10'
           );
         } else if (!video?.favorite) {
           $modalHeart.setAttribute(
             'class',
-            'fa-regular fa-heart fa-xl modal-heart-outline heart absolute left-2 top-10',
+            'fa-regular fa-heart fa-xl modal-heart-outline heart absolute left-2 top-10'
           );
         }
       }
@@ -205,7 +202,7 @@ function viewSwap(viewIndex: number): void {
   if (viewIndex === 1) {
     $landing?.setAttribute(
       'class',
-      'container md:pt-14 px-4 md:px-0 pt-8 mx-auto flex flex-wrap md:flex-nowrap max-w-screen-lg',
+      'container md:pt-14 px-4 md:px-0 pt-8 mx-auto flex flex-wrap md:flex-nowrap max-w-screen-lg'
     );
     $results?.setAttribute('class', 'container hidden md:hidden');
     data.viewIndex = 1;
@@ -213,12 +210,12 @@ function viewSwap(viewIndex: number): void {
     $results?.setAttribute('class', 'results-container');
     $landing?.setAttribute(
       'class',
-      'hidden md:hidden container md:pt-14 px-4 md:px-0 pt-8 mx-auto flex flex-wrap md:flex-nowrap max-w-screen-lg',
+      'hidden md:hidden container md:pt-14 px-4 md:px-0 pt-8 mx-auto flex flex-wrap md:flex-nowrap max-w-screen-lg'
     );
     if (data.searchArr[0]) {
       $pNoFavorites?.setAttribute(
         'class',
-        'hidden md:hidden text-lg text-center w-full mt-10',
+        'hidden md:hidden text-lg text-center w-full mt-10'
       );
     } else if (!data.searchArr[0]) {
       $pNoFavorites?.setAttribute('class', 'text-lg text-center w-full mt-10');
@@ -232,12 +229,12 @@ function viewSwap(viewIndex: number): void {
     $results?.setAttribute('class', 'results-container');
     $landing?.setAttribute(
       'class',
-      'hidden md:hidden container md:pt-14 px-4 md:px-0 pt-8 mx-auto flex flex-wrap md:flex-nowrap max-w-screen-lg',
+      'hidden md:hidden container md:pt-14 px-4 md:px-0 pt-8 mx-auto flex flex-wrap md:flex-nowrap max-w-screen-lg'
     );
     if (data.favoritesArr[0]) {
       $pNoFavorites?.setAttribute(
         'class',
-        'hidden md:hidden text-lg text-center w-full mt-10',
+        'hidden md:hidden text-lg text-center w-full mt-10'
       );
     } else if (!data.favoritesArr[0] && $pNoFavorites) {
       $pNoFavorites.setAttribute('class', ' text-lg text-center w-full mt-10');
@@ -255,7 +252,7 @@ function toggleFavorite(eventTarget: HTMLElement): void {
     if (video)
       if (video.favorite === true) {
         const index = data.favoritesArr.findIndex(
-          (element) => element.id === video.id,
+          element => element.id === video.id
         );
         data.favoritesArr.splice(index, 1);
         video.favorite = false;
@@ -272,15 +269,15 @@ function toggleHeart(eventTarget: HTMLElement): void {
   if (video) {
     eventTarget.setAttribute(
       'class',
-      setHeartClass(video.favorite, eventTarget),
+      setHeartClass(video.favorite, eventTarget)
     );
   }
 }
 
 function findVideoById(id: string | undefined): Video | undefined {
   return (
-    data.searchArr.find((video) => video.id === id) ||
-    data.favoritesArr.find((video) => video.id === id)
+    data.searchArr.find(video => video.id === id) ||
+    data.favoritesArr.find(video => video.id === id)
   );
 }
 
@@ -312,17 +309,17 @@ function renderVideos(render: string): HTMLElement {
   const $vidContainer = $videosDiv.appendChild(document.createElement('div'));
   $vidContainer.setAttribute(
     'class',
-    'vidContainer mx-auto flex flex-wrap md:justify-between justify-center w-full',
+    'vidContainer mx-auto flex flex-wrap md:justify-between justify-center w-full'
   );
   for (let i = 0; i < renderVid.length; i++) {
     const $videoContainer = $vidContainer.appendChild(
-      document.createElement('div'),
+      document.createElement('div')
     );
     if (!$videoContainer) throw new Error('$videoContainer creation error');
     $videoContainer.setAttribute('class', 'video-div basis-1/3 mb-8');
 
     const $videoAnchor = $videoContainer.appendChild(
-      document.createElement('a'),
+      document.createElement('a')
     );
     if (!$videoAnchor) throw new Error('$videoAnchor creation error');
     $videoAnchor.setAttribute('href', '#');
@@ -335,33 +332,33 @@ function renderVideos(render: string): HTMLElement {
     $thumbnail.setAttribute('data-id', renderVid[i].id);
 
     const $videoText = $videoContainer.appendChild(
-      document.createElement('div'),
+      document.createElement('div')
     );
     if (!$videoText) throw new Error('unable to create $videoText');
     $videoText.setAttribute('class', 'video-text w-80 pl-1 pt-1');
 
     const $channelHeartsDiv = $videoText.appendChild(
-      document.createElement('p'),
+      document.createElement('p')
     );
     if (!$channelHeartsDiv) throw new Error('unable to create $hearts');
     $channelHeartsDiv.setAttribute(
       'class',
-      'flex justify-between items-center',
+      'flex justify-between items-center'
     );
 
     const $channelAnchor = $channelHeartsDiv.appendChild(
-      document.createElement('a'),
+      document.createElement('a')
     );
     if (!$channelAnchor) throw new Error('unable to create $channelAnchor');
     $channelAnchor?.setAttribute(
       'href',
-      `https://www.youtube.com/channel/${renderVid[i].channelId}`,
+      `https://www.youtube.com/channel/${renderVid[i].channelId}`
     );
     $channelAnchor.setAttribute('class', 'channelAnchor');
     $channelAnchor.setAttribute('target', '_blank');
 
     const $heartAnchor = $channelHeartsDiv.appendChild(
-      document.createElement('a'),
+      document.createElement('a')
     );
     if (!$heartAnchor) throw new Error('$heartAnchor not present');
     $heartAnchor.setAttribute('href', '#');
@@ -372,20 +369,20 @@ function renderVideos(render: string): HTMLElement {
     if (renderVid[i].favorite) {
       $heartSolid.setAttribute(
         'class',
-        'fa-solid fa-heart fa-lg float-right heart pr-2 solid-heart',
+        'fa-solid fa-heart fa-lg float-right heart pr-2 solid-heart'
       );
       $heartOutline.setAttribute(
         'class',
-        'fa-regular fa-heart fa-lg float-right pr-2 heart md:hidden hidden outline-heart',
+        'fa-regular fa-heart fa-lg float-right pr-2 heart md:hidden hidden outline-heart'
       );
     } else if (!renderVid[i].favorite) {
       $heartSolid.setAttribute(
         'class',
-        'fa-solid fa-heart fa-lg float-right heart pr-2 solid-heart md:hidden hidden',
+        'fa-solid fa-heart fa-lg float-right heart pr-2 solid-heart md:hidden hidden'
       );
       $heartOutline.setAttribute(
         'class',
-        'fa-regular fa-heart fa-lg float-right heart pr-2 outline-heart',
+        'fa-regular fa-heart fa-lg float-right heart pr-2 outline-heart'
       );
     }
     $heartSolid.setAttribute('style', 'color: #403768');
