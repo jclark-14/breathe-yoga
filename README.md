@@ -71,34 +71,7 @@ jclark-14.github.io/breathe-yoga/
 
 5. Access the application by navigating to `http://localhost:5173` in your browser (or whichever port your dev server uses).
 
-## Note on API Usage
 
-This project uses the YouTube Data API v3. Ensure you have a valid API key and comply with YouTube's terms of service and usage limits.
-AI-powered pose detection and correction using device camera
-
-Development
-System Requirements
-
-Node.js (version specified in your project)
-npm (version specified in your project)
-
-Getting Started
-
-Clone the repository.
-Copygit clone https://github.com/yourusername/breathe-yoga
-cd breathe-yoga
-
-Install all dependencies with NPM.
-Copynpm install
-
-Set up environment variables:
-Create a .env file in the root directory and add your YouTube API key:
-CopyYOUTUBE_API_KEY=your_api_key_here
-
-Start the development server.
-Copynpm run dev
-
-Access the application by navigating to http://localhost:5173 in your browser (or whichever port your dev server uses).
 
 Note on API Usage
 This project uses the YouTube Data API v3. Ensure you have a valid API key and comply with YouTube's terms of service and usage limits.
