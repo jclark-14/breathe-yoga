@@ -8,7 +8,7 @@ I created Breathe Yoga to address the common challenge of finding suitable yoga 
 
 ## Live Demo
 
-!(jclark-14.github.io/breathe-yoga/)
+![Deployed Site:](jclark-14.github.io/breathe-yoga/)
 
 ## Technologies Used
 
